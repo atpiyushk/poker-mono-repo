@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refer a Friend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: #000;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background decorative ellipses */
+    .bg-ellipse {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .bg-ellipse-1 {
+      width: 314px; height: 314px;
+      background: radial-gradient(circle, rgba(3,140,62,0.12) 0%, transparent 70%);
+      left: 217px; top: 86px;
+    }
+    .bg-ellipse-2 {
+      width: 314px; height: 314px;
+      background: radial-gradient(circle, rgba(3,140,62,0.10) 0%, transparent 70%);
+      left: -212px; top: 290px;
+    }
+    .bg-ellipse-3 {
+      width: 314px; height: 314px;
+      background: radial-gradient(circle, rgba(3,140,62,0.08) 0%, transparent 70%);
+      left: 187px; top: 578px;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      position: absolute;
+      top: 15px;
+      left: 6px;
+      width: 375px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+    }
+    .status-time {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      color: #fff;
+      line-height: 16px;
+      width: 54px;
+      text-align: center;
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Signal bars */
+    .signal {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+    .signal span {
+      background: #fff;
+      border-radius: 1px;
+      width: 3px;
+    }
+    .signal span:nth-child(1) { height: 4px; }
+    .signal span:nth-child(2) { height: 6px; }
+    .signal span:nth-child(3) { height: 9px; }
+    .signal span:nth-child(4) { height: 12px; }
+
+    /* Wifi */
+    .wifi-icon {
+      width: 17px;
+      height: 12px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wifi-icon::before,
+    .wifi-icon::after,
+    .wifi-dot {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    .wifi-icon::before {
+      content: '';
+      width: 16px; height: 16px;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      top: -4px;
+    }
+    .wifi-inner {
+      position: absolute;
+      width: 10px; height: 10px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      top: -1px;
+    }
+    .wifi-dot {
+      width: 3px; height: 3px;
+      background: #fff;
+      border: none;
+      bottom: 0;
+    }
+
+    /* Battery */
+    .battery {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .battery-body {
+      width: 22px;
+      height: 11px;
+      border: 1.5px solid #fff;
+      border-radius: 2px;
+      position: relative;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+    }
+    .battery-fill {
+      background: #fff;
+      height: 100%;
+      width: 75%;
+      border-radius: 1px;
+    }
+    .battery-tip {
+      width: 2px;
+      height: 5px;
+      background: #fff;
+      border-radius: 0 1px 1px 0;
+    }
+
+    /* Header */
+    .header {
+      position: absolute;
+      top: 57px;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .back-btn {
+      position: absolute;
+      left: 32px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .back-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #cbffde;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .header-title {
+      font-size: 20px;
+      font-weight: 500;
+      color: #038c3e;
+      line-height: 21px;
+    }
+
+    /* Illustration area */
+    .illustration {
+      position: absolute;
+      top: 130px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 200px;
+    }
+
+    /* Banner shape */
+    .banner-wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* REFER a text */
+    .refer-text-wrap {
+      position: absolute;
+      top: 38px;
+      left: 10px;
+      transform: rotate(-9.87deg);
+      transform-origin: center center;
+    }
+    .refer-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 36px;
+      color: #fff;
+      line-height: 1.2;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    /* FRIEND text */
+    .friend-text-wrap {
+      position: absolute;
+      top: 88px;
+      left: 8px;
+      transform: rotate(-9.49deg);
+      transform-origin: center center;
+    }
+    .friend-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 46px;
+      color: #171a18;
+      line-height: 1.2;
+    }
+
+    /* Megaphone icon placeholder */
+    .megaphone {
+      position: absolute;
+      bottom: 10px;
+      right: 0;
+      width: 75px;
+      height: 52px;
+    }
+
+    /* Code label */
+    .use-code {
+      position: absolute;
+      top: 386px;
+      left: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #038c3e;
+      line-height: 18px;
+    }
+
+    /* Description text */
+    .description {
+      position: absolute;
+      top: 421px;
+      left: 20px;
+      width: 350px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #9ab6a4;
+      line-height: 18px;
+    }
+
+    /* Copy Code button */
+    .btn-copy {
+      position: absolute;
+      top: 611px;
+      left: 16px;
+      width: 358px;
+      height: 56px;
+      background: linear-gradient(to bottom, #0cf25d, #038c3e);
+      border: 1px solid #38ff7e;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 400;
+      color: #030a06;
+      font-family: 'Poppins', sans-serif;
+      transition: opacity 0.15s;
+    }
+    .btn-copy:hover { opacity: 0.9; }
+    .btn-copy:active { opacity: 0.8; }
+
+    /* Email a friend button */
+    .btn-email {
+      position: absolute;
+      top: 691px;
+      left: 16px;
+      width: 358px;
+      height: 56px;
+      background: linear-gradient(to bottom, #595d5a, #2e3330);
+      border: 1px solid #666;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 400;
+      color: #cbffde;
+      font-family: 'Poppins', sans-serif;
+      transition: opacity 0.15s;
+    }
+    .btn-email:hover { opacity: 0.9; }
+    .btn-email:active { opacity: 0.8; }
+
+    /* Home indicator */
+    .home-indicator {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 98px;
+      height: 4px;
+      background: #d9d9d9;
+      border-radius: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- Background ellipses -->
+  <div class="bg-ellipse bg-ellipse-1"></div>
+  <div class="bg-ellipse bg-ellipse-2"></div>
+  <div class="bg-ellipse bg-ellipse-3"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-icons">
+      <!-- Signal -->
+      <div class="signal">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <!-- Wifi -->
+      <div class="wifi-icon">
+        <div class="wifi-inner"></div>
+        <div class="wifi-dot"></div>
+      </div>
+      <!-- Battery -->
+      <div class="battery">
+        <div class="battery-body">
+          <div class="battery-fill"></div>
+        </div>
+        <div class="battery-tip"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="back-btn">
+      <svg viewBox="0 0 24 24">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </div>
+    <span class="header-title">Refer a friend</span>
+  </div>
+
+  <!-- Illustration -->
+  <div class="illustration">
+    <svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Dark banner / flag shape -->
+      <polygon points="10,20 210,10 200,120 5,130" fill="#1a1f1c" opacity="0.9"/>
+      <!-- Green accent shape -->
+      <polygon points="5,90 200,80 195,145 0,158" fill="#0cf25d" opacity="0.9"/>
+      <!-- Shadow / fold effect -->
+      <polygon points="195,145 220,160 200,165 195,145" fill="#038c3e"/>
+      <!-- REFER a text -->
+      <text x="22" y="72" font-family="Poppins, sans-serif" font-weight="700" font-size="38" fill="#ffffff"
+        transform="rotate(-9.87, 22, 72)">REFER a</text>
+      <!-- FRIEND text -->
+      <text x="15" y="132" font-family="Poppins, sans-serif" font-weight="700" font-size="46" fill="#171a18"
+        transform="rotate(-9.49, 15, 132)">FRIEND</text>
+    </svg>
+
+    <!-- Megaphone SVG -->
+    <svg class="megaphone" viewBox="0 0 90 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Megaphone body -->
+      <ellipse cx="30" cy="30" rx="14" ry="14" fill="#0cf25d"/>
+      <!-- Cone -->
+      <polygon points="44,22 85,5 85,55 44,38" fill="#038c3e"/>
+      <!-- Handle -->
+      <rect x="16" y="34" width="8" height="18" rx="4" fill="#0cf25d"/>
+      <!-- Bell ring lines -->
+      <line x1="78" y1="28" x2="88" y2="24" stroke="#cbffde" stroke-width="2" stroke-linecap="round"/>
+      <line x1="80" y1="33" x2="90" y2="33" stroke="#cbffde" stroke-width="2" stroke-linecap="round"/>
+      <line x1="78" y1="38" x2="88" y2="42" stroke="#cbffde" stroke-width="2" stroke-linecap="round"/>
+      <!-- Speaker mesh lines on body -->
+      <line x1="22" y1="22" x2="22" y2="38" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+      <line x1="28" y1="18" x2="28" y2="42" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+      <line x1="34" y1="22" x2="34" y2="38" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <!-- Use Code -->
+  <div class="use-code">Use Code - PR - 401FRLV</div>
+
+  <!-- Description -->
+  <div class="description">
+    Share your unique code with your friends and let them join easily. When they sign up using your code, both of you earn rewards!
+  </div>
+
+  <!-- Copy Code Button -->
+  <button class="btn-copy" onclick="copyCode()">Copy Code</button>
+
+  <!-- Email a friend Button -->
+  <button class="btn-email" onclick="emailFriend()">Email a friend</button>
+
+  <!-- Home Indicator -->
+  <div class="home-indicator"></div>
+
+</div>
+
+<script>
+  function copyCode() {
+    navigator.clipboard.writeText('PR-401FRLV').then(() => {
+      const btn = document.querySelector('.btn-copy');
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      alert('Code: PR-401FRLV');
+    });
+  }
+
+  function emailFriend() {
+    const subject = encodeURIComponent('Join using my referral code!');
+    const body = encodeURIComponent('Hey! Use my referral code PR-401FRLV to sign up and we both earn rewards!');
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }
+</script>
+
+</body>
+</html>
