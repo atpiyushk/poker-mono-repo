@@ -1,0 +1,350 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum GameFamily {
+  Poker
+  TeenPatti
+}
+
+enum PokerVariant {
+  TexasHoldem
+  Omaha
+  Pineapple
+}
+
+enum LimitType {
+  NoLimit
+  PotLimit
+  TableLimit
+}
+
+enum TournamentStatus {
+  draft
+  active
+  paused
+  completed
+  cancelled
+}
+
+enum SeatState {
+  seated
+  sitout
+  surrendered
+  detached
+}
+
+enum WalletTxType {
+  buyin
+  rebuy
+  cashout
+  surrender
+  adjustment
+}
+
+enum WsStatus {
+  connected
+  disconnected
+  error
+}
+
+// ─── Events & Tournaments ────────────────────────────────────────────────────
+
+model Event {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  tournaments Tournament[]
+
+  @@map("events")
+}
+
+model Tournament {
+  id        Int              @id @default(autoincrement())
+  eventId   Int              @map("event_id")
+  name      String
+  family    GameFamily
+  variant   PokerVariant
+  limitType LimitType        @map("limit_type")
+  status    TournamentStatus @default(draft)
+  startedAt DateTime?        @map("started_at")
+  endedAt   DateTime?        @map("ended_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  event           Event                    @relation(fields: [eventId], references: [id])
+  tournamentTables TournamentTable[]
+  registrations   TournamentRegistration[]
+  scoringRuns     ScoringRun[]
+  pointsLedger    PointsLedger[]
+  leaderboardSnapshots LeaderboardSnapshot[]
+
+  @@map("tournaments")
+}
+
+// ─── Tables ──────────────────────────────────────────────────────────────────
+
+model TableRegistry {
+  id          Int      @id @default(autoincrement())
+  tableId     String   @unique @map("table_id")
+  url         String
+  displayName String   @map("display_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tournamentTables TournamentTable[]
+  systemHealth     SystemHealth?
+
+  @@map("tables_registry")
+}
+
+model TournamentTable {
+  id           Int      @id @default(autoincrement())
+  tournamentId Int      @map("tournament_id")
+  tableId      Int      @map("table_id")
+  attachedAt   DateTime @default(now()) @map("attached_at")
+  detachedAt   DateTime? @map("detached_at")
+  isAttached   Boolean  @default(true) @map("is_attached")
+
+  tournament   Tournament    @relation(fields: [tournamentId], references: [id])
+  table        TableRegistry @relation(fields: [tableId], references: [id])
+  sessions     TableSession[]
+
+  @@map("tournament_tables")
+}
+
+model TableSession {
+  id                Int       @id @default(autoincrement())
+  tournamentTableId Int       @map("tournament_table_id")
+  startedAt         DateTime  @default(now()) @map("started_at")
+  endedAt           DateTime? @map("ended_at")
+  resetRequested    Boolean   @default(true) @map("reset_requested")
+
+  tournamentTable TournamentTable  @relation(fields: [tournamentTableId], references: [id])
+  seatAssignments SeatAssignment[]
+  messageEvents   MessageEvent[]
+  handEvents      HandEvent[]
+  handResults     HandResult[]
+
+  @@map("table_sessions")
+}
+
+// ─── Players & Registration ──────────────────────────────────────────────────
+
+model Player {
+  id         Int      @id @default(autoincrement())
+  firstName  String   @map("first_name")
+  lastName   String   @map("last_name")
+  email      String   @unique
+  phone      String?
+  screenName String   @unique @map("screen_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  registrations   TournamentRegistration[]
+  seatAssignments SeatAssignment[]
+  walletAccounts  WalletAccount[]
+  handResults     HandResult[]
+  pointsLedger    PointsLedger[]
+  leaderboardSnapshots LeaderboardSnapshot[]
+
+  @@map("players")
+}
+
+model TournamentRegistration {
+  id            Int      @id @default(autoincrement())
+  tournamentId  Int      @map("tournament_id")
+  playerId      Int      @map("player_id")
+  activeAccrual Boolean  @default(true) @map("active_accrual")
+  registeredAt  DateTime @default(now()) @map("registered_at")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([playerId, activeAccrual], name: "single_active_accrual")
+  @@map("tournament_registrations")
+}
+
+// ─── Seat Assignments ────────────────────────────────────────────────────────
+
+model SeatAssignment {
+  id             Int       @id @default(autoincrement())
+  tableSessionId Int       @map("table_session_id")
+  playerId       Int       @map("player_id")
+  seatNumber     Int       @map("seat_number")
+  state          SeatState @default(seated)
+  seatedAt       DateTime  @default(now()) @map("seated_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  tableSession TableSession @relation(fields: [tableSessionId], references: [id])
+  player       Player       @relation(fields: [playerId], references: [id])
+
+  @@map("seat_assignments")
+}
+
+// ─── Wallet ──────────────────────────────────────────────────────────────────
+
+model WalletAccount {
+  id        Int      @id @default(autoincrement())
+  playerId  Int      @map("player_id")
+  eventId   Int      @map("event_id")
+  balance   Float    @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  player       Player             @relation(fields: [playerId], references: [id])
+  lock         WalletLock?
+  transactions WalletTransaction[]
+
+  @@unique([playerId, eventId])
+  @@map("wallet_accounts")
+}
+
+model WalletLock {
+  id              Int      @id @default(autoincrement())
+  walletAccountId Int      @unique @map("wallet_account_id")
+  lockedBy        String   @map("locked_by")
+  tableSessionId  Int?     @map("table_session_id")
+  lockedAt        DateTime @default(now()) @map("locked_at")
+
+  walletAccount WalletAccount @relation(fields: [walletAccountId], references: [id])
+
+  @@map("wallet_locks")
+}
+
+model WalletTransaction {
+  id              Int        @id @default(autoincrement())
+  walletAccountId Int        @map("wallet_account_id")
+  type            WalletTxType
+  amount          Float
+  balanceBefore   Float      @map("balance_before")
+  balanceAfter    Float      @map("balance_after")
+  note            String?
+  createdAt       DateTime   @default(now()) @map("created_at")
+
+  walletAccount WalletAccount @relation(fields: [walletAccountId], references: [id])
+
+  @@map("wallet_transactions")
+}
+
+// ─── Message Ingestion ───────────────────────────────────────────────────────
+
+model MessageEvent {
+  id             Int      @id @default(autoincrement())
+  tableSessionId Int      @map("table_session_id")
+  tableId        String   @map("table_id")
+  messageType    String   @map("message_type")
+  rawJson        Json     @map("raw_json")
+  receivedAt     DateTime @default(now()) @map("received_at")
+
+  tableSession TableSession @relation(fields: [tableSessionId], references: [id])
+
+  @@index([tableId, receivedAt])
+  @@index([messageType])
+  @@map("message_events")
+}
+
+model HandEvent {
+  id             Int      @id @default(autoincrement())
+  tableSessionId Int      @map("table_session_id")
+  handId         String   @map("hand_id")
+  eventType      String   @map("event_type")
+  seatId         Int?     @map("seat_id")
+  data           Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tableSession TableSession @relation(fields: [tableSessionId], references: [id])
+
+  @@index([handId])
+  @@index([eventType])
+  @@map("hand_events")
+}
+
+model HandResult {
+  id             Int      @id @default(autoincrement())
+  tableSessionId Int      @map("table_session_id")
+  handId         String   @map("hand_id")
+  playerId       Int      @map("player_id")
+  seatId         Int      @map("seat_id")
+  netChips       Float    @map("net_chips")
+  totalBet       Float    @default(0) @map("total_bet")
+  winAmount      Float    @default(0) @map("win_amount")
+  winningHand    String?  @map("winning_hand")
+  isWinner       Boolean  @default(false) @map("is_winner")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tableSession TableSession @relation(fields: [tableSessionId], references: [id])
+  player       Player       @relation(fields: [playerId], references: [id])
+
+  @@index([handId])
+  @@index([playerId])
+  @@map("hand_results")
+}
+
+// ─── Scoring & Leaderboard ───────────────────────────────────────────────────
+
+model ScoringRun {
+  id           Int      @id @default(autoincrement())
+  tournamentId Int      @map("tournament_id")
+  handId       String   @map("hand_id")
+  computedAt   DateTime @default(now()) @map("computed_at")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@map("scoring_runs")
+}
+
+model PointsLedger {
+  id             Int      @id @default(autoincrement())
+  tournamentId   Int      @map("tournament_id")
+  playerId       Int      @map("player_id")
+  handId         String   @map("hand_id")
+  pointsDelta    Float    @map("points_delta")
+  formulaVersion String   @default("v1") @map("formula_version")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@index([tournamentId, playerId])
+  @@index([handId])
+  @@map("points_ledger")
+}
+
+model LeaderboardSnapshot {
+  id           Int      @id @default(autoincrement())
+  tournamentId Int      @map("tournament_id")
+  playerId     Int      @map("player_id")
+  totalPoints  Float    @map("total_points")
+  rank         Int
+  handsPlayed  Int      @default(0) @map("hands_played")
+  snapshotAt   DateTime @default(now()) @map("snapshot_at")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@index([tournamentId, rank])
+  @@map("leaderboard_snapshots")
+}
+
+// ─── System Health ───────────────────────────────────────────────────────────
+
+model SystemHealth {
+  id             Int      @id @default(autoincrement())
+  tableRegistryId Int     @unique @map("table_registry_id")
+  wsStatus       WsStatus @default(disconnected) @map("ws_status")
+  lastMessageAt  DateTime? @map("last_message_at")
+  reconnectCount Int      @default(0) @map("reconnect_count")
+  lastError      String?  @map("last_error")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  tableRegistry TableRegistry @relation(fields: [tableRegistryId], references: [id])
+
+  @@map("system_health")
+}
