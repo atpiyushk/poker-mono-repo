@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>Predicta — Live Tournament Display · 1920×1080</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ─────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────── */
+    :root {
+      --bg:        #030A06;
+      --card:      #0A1A0F;
+      --elevated:  #0F2218;
+      --border:    #1A3A26;
+      --border-s:  #0D1F14;
+
+      --green:     #37FF7D;
+      --green-10:  rgba(55,255,125,0.10);
+      --green-20:  rgba(55,255,125,0.20);
+      --green-glow: 0 0 32px rgba(55,255,125,0.20);
+
+      --blue:      #47B8FF;
+      --blue-10:   rgba(71,184,255,0.10);
+      --gold:      #FFD700;
+      --gold2:     #FFB547;
+      --silver:    #C0C0C0;
+      --bronze:    #CD7F32;
+      --red:       #FF4747;
+      --red-10:    rgba(255,71,71,0.10);
+
+      --t1: #FFFFFF;
+      --t2: #8BA89A;
+      --t3: #4A6B57;
+
+      --font: 'VoldaSans', 'Rajdhani', system-ui, sans-serif;
+    }
+
+    /* ─────────────────────────────────
+       RESET
+    ───────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--t1);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─────────────────────────────────
+       TV SHELL
+    ───────────────────────────────── */
+    .tv {
+      display: grid;
+      grid-template-rows: 78px 1fr 52px;
+      height: 1080px;
+      width: 1920px;
+    }
+
+    /* ═══════════════════════════════
+       HEADER BAR
+    ═══════════════════════════════ */
+    .tv-head {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 44px;
+      gap: 0;
+      flex-shrink: 0;
+    }
+
+    .logo-wrap { display: flex; align-items: center; gap: 13px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: var(--green);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 700;
+      color: #030A06;
+      letter-spacing: -0.5px;
+    }
+    .logo-text {}
+    .logo-name { font-size: 21px; font-weight: 700; color: var(--t1); letter-spacing: 0.3px; }
+    .logo-sub  { font-size: 9px;  font-weight: 600; color: var(--t3); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 1px; }
+
+    .head-sep { width: 1px; height: 38px; background: var(--border); margin: 0 28px; }
+
+    .head-tourn {}
+    .head-tourn-name { font-size: 22px; font-weight: 700; color: var(--t1); letter-spacing: 0.3px; }
+    .head-tourn-meta { font-size: 13px; color: var(--t2); margin-top: 2px; letter-spacing: 0.3px; }
+
+    .head-space { flex: 1; }
+
+    .head-kpi { display: flex; align-items: center; gap: 0; }
+    .kpi-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 24px; }
+    .kpi-item + .kpi-item { border-left: 1px solid var(--border); }
+    .kpi-val { font-size: 22px; font-weight: 700; color: var(--t1); line-height: 1; }
+    .kpi-lbl { font-size: 9px; font-weight: 600; color: var(--t3); letter-spacing: 2px; text-transform: uppercase; }
+
+    .head-sep2 { width: 1px; height: 38px; background: var(--border); margin: 0 24px; }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 18px;
+      background: var(--green-10);
+      border: 1.5px solid rgba(55,255,125,0.35);
+      border-radius: 30px;
+      font-size: 13px; font-weight: 700;
+      color: var(--green); letter-spacing: 1.5px;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      background: var(--green); border-radius: 50%;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 6px var(--green);} 50%{opacity:0.3;box-shadow:none;} }
+
+    .head-clock {
+      font-size: 32px; font-weight: 700;
+      color: var(--t1); letter-spacing: 2px;
+      margin-left: 28px;
+    }
+
+    /* ═══════════════════════════════
+       BODY GRID
+    ═══════════════════════════════ */
+    .tv-body {
+      display: grid;
+      grid-template-columns: 1fr 552px;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════
+       LEFT — LEADERBOARD PANEL
+    ═══════════════════════════════ */
+    .lb-panel {
+      border-right: 1px solid var(--border);
+      padding: 28px 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow: hidden;
+    }
+
+    /* Panel heading */
+    .lb-head {
+      display: flex; align-items: baseline; gap: 14px;
+    }
+    .lb-title {
+      font-size: 11px; font-weight: 700;
+      color: var(--t3); letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+    .lb-subtitle { font-size: 13px; color: var(--t2); }
+
+    /* ── TOP 3 CARDS ── */
+    .top3-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .top3-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Colored top stripe */
+    .top3-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 14px 14px 0 0;
+    }
+    .top3-card.g::before { background: var(--gold);   box-shadow: 0 0 16px rgba(255,215,0,0.5); }
+    .top3-card.s::before { background: var(--silver); }
+    .top3-card.b::before { background: var(--bronze); }
+
+    .top3-top-row {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .medal { font-size: 26px; line-height: 1; }
+    .rank-label { font-size: 12px; font-weight: 700; color: var(--t3); letter-spacing: 0.5px; }
+    .table-chip {
+      margin-left: auto;
+      font-size: 11px; font-weight: 700;
+      color: var(--blue);
+      background: var(--blue-10);
+      border: 1px solid rgba(71,184,255,0.3);
+      padding: 3px 9px; border-radius: 5px;
+    }
+
+    .top3-name  { font-size: 30px; font-weight: 700; color: var(--t1); letter-spacing: 0.2px; line-height: 1; }
+    .top3-real  { font-size: 12px; color: var(--t3); margin-top: 3px; }
+
+    .bar-wrap { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.6s ease; }
+
+    .top3-pts-row { display: flex; align-items: baseline; gap: 6px; }
+    .top3-pts   { font-size: 38px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -1px; }
+    .top3-pts-lbl { font-size: 11px; color: var(--t3); letter-spacing: 1px; text-transform: uppercase; }
+
+    .top3-meta  { display: flex; gap: 18px; font-size: 13px; color: var(--t2); }
+
+    /* ── RANK 4-10 LIST ── */
+    .lb-list { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+
+    .lb-list-hd {
+      display: grid;
+      grid-template-columns: 58px 1fr 88px 84px 148px 180px;
+      align-items: center;
+      gap: 14px;
+      padding: 9px 20px;
+      background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+    }
+    .hd-cell {
+      font-size: 10px; font-weight: 700;
+      color: var(--t3); letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .hd-r { text-align: right; }
+    .hd-c { text-align: center; }
+
+    .lb-row {
+      display: grid;
+      grid-template-columns: 58px 1fr 88px 84px 148px 180px;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border-s);
+      transition: background 0.15s;
+      cursor: default;
+      flex: 1;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--elevated); }
+
+    .row-rank { font-size: 28px; font-weight: 700; color: var(--t3); text-align: center; }
+    .row-player { display: flex; flex-direction: column; gap: 2px; }
+    .row-screen { font-size: 21px; font-weight: 600; color: var(--t1); }
+    .row-real   { font-size: 12px; color: var(--t3); }
+    .row-tbl    { font-size: 14px; font-weight: 700; color: var(--blue); text-align: right; }
+    .row-hands  { font-size: 16px; font-weight: 600; color: var(--t2); text-align: right; }
+    .row-pts    { font-size: 24px; font-weight: 700; color: var(--green); text-align: right; letter-spacing: -0.5px; }
+    .row-bar-wrap { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .row-bar    { height: 100%; background: var(--green); border-radius: 3px; opacity: 0.65; }
+
+    /* ═══════════════════════════════
+       RIGHT — INFO PANEL
+    ═══════════════════════════════ */
+    .info-panel {
+      padding: 24px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .info-section { margin-bottom: 18px; }
+    .info-lbl {
+      font-size: 10px; font-weight: 700;
+      color: var(--t3); letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* Table health 2×3 grid */
+    .health-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .h-card {
+      background: var(--elevated);
+      border: 1px solid var(--border-s);
+      border-radius: 9px;
+      padding: 11px 13px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .h-card.offline { border-color: rgba(255,71,71,0.25); }
+    .h-card.idle    { border-color: rgba(255,181,71,0.25); }
+
+    .h-top  { display: flex; justify-content: space-between; align-items: center; }
+    .h-id   { font-size: 13px; font-weight: 700; color: var(--t1); letter-spacing: 0.5px; }
+    .h-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .h-dot.on  { background: var(--green);   box-shadow: 0 0 8px var(--green);   animation: pulse 1.6s infinite; }
+    .h-dot.idle{ background: var(--gold2); }
+    .h-dot.off { background: var(--red); }
+
+    .h-count { font-size: 24px; font-weight: 700; line-height: 1; }
+    .h-count .h-of { font-size: 14px; color: var(--t3); font-weight: 500; }
+    .h-bar-w { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .h-bar-f { height: 100%; border-radius: 2px; }
+    .h-bar-f.on   { background: var(--green); }
+    .h-bar-f.idle { background: var(--gold2); }
+    .h-bar-f.off  { background: var(--red); width: 0 !important; }
+    .h-rate { font-size: 11px; color: var(--t3); font-weight: 600; }
+
+    /* Divider */
+    .info-divider { height: 1px; background: var(--border); margin-bottom: 18px; }
+
+    /* Last hand winner */
+    .winner-card {
+      background: var(--card);
+      border: 1px solid rgba(55,255,125,0.35);
+      border-radius: 11px;
+      padding: 16px 18px;
+      box-shadow: var(--green-glow);
+      display: flex; flex-direction: column; gap: 9px;
+    }
+    .winner-top-row { display: flex; align-items: center; gap: 8px; }
+    .winner-badge {
+      font-size: 9px; font-weight: 700;
+      color: var(--green); background: var(--green-10);
+      border: 1px solid rgba(55,255,125,0.3);
+      padding: 3px 9px; border-radius: 20px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      display: flex; align-items: center; gap: 5px;
+      margin-left: auto;
+    }
+    .winner-badge-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 1.6s infinite; }
+    .winner-lbl { font-size: 9px; font-weight: 700; color: var(--t3); letter-spacing: 2px; text-transform: uppercase; }
+    .winner-name { font-size: 32px; font-weight: 700; color: var(--t1); line-height: 1; }
+    .winner-meta { font-size: 13px; color: var(--t2); }
+    .winner-pts-row { display: flex; align-items: baseline; gap: 8px; }
+    .winner-pts { font-size: 28px; font-weight: 700; color: var(--green); }
+    .winner-pts-lbl { font-size: 12px; color: var(--t3); }
+
+    /* Bottom stats strip */
+    .bottom-stats {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .bs-row { display: flex; justify-content: space-between; align-items: center; }
+    .bs-label { font-size: 11px; color: var(--t3); }
+    .bs-val   { font-size: 13px; font-weight: 700; color: var(--t1); }
+    .bs-val.green { color: var(--green); }
+
+    /* ═══════════════════════════════
+       FOOTER TICKER
+    ═══════════════════════════════ */
+    .tv-foot {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 44px; gap: 0;
+      overflow: hidden;
+    }
+
+    .ticker-tag {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 10px; font-weight: 700;
+      color: var(--t3); letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap; flex-shrink: 0;
+      padding-right: 20px;
+      border-right: 1px solid var(--border);
+      margin-right: 20px;
+    }
+    .ticker-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 1.6s infinite; }
+
+    .ticker-scroll {
+      flex: 1; overflow: hidden;
+      font-size: 14px; color: var(--t2);
+      white-space: nowrap;
+    }
+    .ticker-scroll .ev { display: inline; margin-right: 80px; }
+    .ticker-scroll .ev strong { color: var(--t1); font-weight: 600; }
+    .ticker-scroll .ev .tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 700;
+      padding: 1px 7px; border-radius: 4px;
+      margin: 0 4px;
+    }
+    .tag-g { background: var(--green-10); color: var(--green); }
+    .tag-b { background: var(--blue-10);  color: var(--blue); }
+    .tag-gold { background: rgba(255,215,0,0.1); color: var(--gold2); }
+
+    .ticker-brand {
+      font-size: 11px; font-weight: 700;
+      color: var(--t3); letter-spacing: 1.5px;
+      text-transform: uppercase;
+      white-space: nowrap; flex-shrink: 0;
+      padding-left: 20px;
+      border-left: 1px solid var(--border);
+      margin-left: 20px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="tv">
+
+  <!-- ══════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════ -->
+  <header class="tv-head">
+
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <div class="logo-mark">PT</div>
+      <div class="logo-text">
+        <div class="logo-name">Predicta</div>
+        <div class="logo-sub">Tournament</div>
+      </div>
+    </div>
+
+    <div class="head-sep"></div>
+
+    <!-- Tournament Info -->
+    <div class="head-tourn">
+      <div class="head-tourn-name">Grand Poker Championship</div>
+      <div class="head-tourn-meta">Texas Hold'em &nbsp;·&nbsp; No Limit &nbsp;·&nbsp; TRN-2026-0044</div>
+    </div>
+
+    <div class="head-space"></div>
+
+    <!-- KPI Stats -->
+    <div class="head-kpi">
+      <div class="kpi-item">
+        <span class="kpi-val">82</span>
+        <span class="kpi-lbl">Players</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val">1,840</span>
+        <span class="kpi-lbl">Hands</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val">12</span>
+        <span class="kpi-lbl">Tables</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val" style="color:var(--green);">$48,200</span>
+        <span class="kpi-lbl">Total Buy-in</span>
+      </div>
+    </div>
+
+    <div class="head-sep2"></div>
+
+    <!-- Live Badge -->
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      LIVE
+    </div>
+
+    <!-- Clock -->
+    <div class="head-clock">19:42</div>
+
+  </header>
+
+
+  <!-- ══════════════════════════════════════════
+       BODY
+  ══════════════════════════════════════════ -->
+  <div class="tv-body">
+
+    <!-- ─────────────────────────────────────
+         LEFT: LEADERBOARD
+    ───────────────────────────────────── -->
+    <div class="lb-panel">
+
+      <!-- Heading -->
+      <div class="lb-head">
+        <span class="lb-title">Live Leaderboard</span>
+        <span class="lb-subtitle">Grand Poker Championship &nbsp;·&nbsp; 82 players active</span>
+      </div>
+
+      <!-- TOP 3 CARDS -->
+      <div class="top3-grid">
+
+        <!-- RANK 1 -->
+        <div class="top3-card g">
+          <div class="top3-top-row">
+            <div class="medal">🥇</div>
+            <div class="rank-label">RANK #1</div>
+            <div class="table-chip">TBL-03</div>
+          </div>
+          <div>
+            <div class="top3-name">ShadowAce</div>
+            <div class="top3-real">Arjun Mehta</div>
+          </div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div>
+          <div class="top3-pts-row">
+            <span class="top3-pts">14,820</span>
+            <span class="top3-pts-lbl">pts</span>
+          </div>
+          <div class="top3-meta">
+            <span>88 hands</span>
+            <span>32 wins</span>
+          </div>
+        </div>
+
+        <!-- RANK 2 -->
+        <div class="top3-card s">
+          <div class="top3-top-row">
+            <div class="medal">🥈</div>
+            <div class="rank-label">RANK #2</div>
+            <div class="table-chip">TBL-01</div>
+          </div>
+          <div>
+            <div class="top3-name">NightFold</div>
+            <div class="top3-real">Priya Sharma</div>
+          </div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:91%"></div></div>
+          <div class="top3-pts-row">
+            <span class="top3-pts">13,445</span>
+            <span class="top3-pts-lbl">pts</span>
+          </div>
+          <div class="top3-meta">
+            <span>72 hands</span>
+            <span>24 wins</span>
+          </div>
+        </div>
+
+        <!-- RANK 3 -->
+        <div class="top3-card b">
+          <div class="top3-top-row">
+            <div class="medal">🥉</div>
+            <div class="rank-label">RANK #3</div>
+            <div class="table-chip">TBL-02</div>
+          </div>
+          <div>
+            <div class="top3-name">BluffKing</div>
+            <div class="top3-real">Rahul Das</div>
+          </div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:82%"></div></div>
+          <div class="top3-pts-row">
+            <span class="top3-pts">12,100</span>
+            <span class="top3-pts-lbl">pts</span>
+          </div>
+          <div class="top3-meta">
+            <span>91 hands</span>
+            <span>28 wins</span>
+          </div>
+        </div>
+
+      </div>
+      <!-- END TOP 3 -->
+
+      <!-- RANK 4-10 LIST -->
+      <div class="lb-list">
+
+        <!-- Header row -->
+        <div class="lb-list-hd">
+          <div class="hd-cell hd-c">Rank</div>
+          <div class="hd-cell">Player</div>
+          <div class="hd-cell hd-r">Table</div>
+          <div class="hd-cell hd-r">Hands</div>
+          <div class="hd-cell hd-r">Points</div>
+          <div class="hd-cell">Progress</div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="lb-row">
+          <div class="row-rank">4</div>
+          <div class="row-player">
+            <div class="row-screen">CardShark</div>
+            <div class="row-real">Karan Tiwari</div>
+          </div>
+          <div class="row-tbl">TBL-01</div>
+          <div class="row-hands">65</div>
+          <div class="row-pts">11,780</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:79%"></div></div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="lb-row">
+          <div class="row-rank">5</div>
+          <div class="row-player">
+            <div class="row-screen">RiverBoss</div>
+            <div class="row-real">Divya Patel</div>
+          </div>
+          <div class="row-tbl">TBL-04</div>
+          <div class="row-hands">58</div>
+          <div class="row-pts">10,990</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:74%"></div></div>
+        </div>
+
+        <!-- Row 6 -->
+        <div class="lb-row">
+          <div class="row-rank">6</div>
+          <div class="row-player">
+            <div class="row-screen">AceDeep</div>
+            <div class="row-real">Sonal Roy</div>
+          </div>
+          <div class="row-tbl">TBL-02</div>
+          <div class="row-hands">77</div>
+          <div class="row-pts">10,450</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:71%"></div></div>
+        </div>
+
+        <!-- Row 7 -->
+        <div class="lb-row">
+          <div class="row-rank">7</div>
+          <div class="row-player">
+            <div class="row-screen">KingBluff</div>
+            <div class="row-real">Mohit Sharma</div>
+          </div>
+          <div class="row-tbl">TBL-03</div>
+          <div class="row-hands">69</div>
+          <div class="row-pts">9,800</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:66%"></div></div>
+        </div>
+
+        <!-- Row 8 -->
+        <div class="lb-row">
+          <div class="row-rank">8</div>
+          <div class="row-player">
+            <div class="row-screen">PokerFace</div>
+            <div class="row-real">Neha Gupta</div>
+          </div>
+          <div class="row-tbl">TBL-05</div>
+          <div class="row-hands">54</div>
+          <div class="row-pts">9,100</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:61%"></div></div>
+        </div>
+
+        <!-- Row 9 -->
+        <div class="lb-row">
+          <div class="row-rank">9</div>
+          <div class="row-player">
+            <div class="row-screen">DarkHorse</div>
+            <div class="row-real">Amit Kumar</div>
+          </div>
+          <div class="row-tbl">TBL-05</div>
+          <div class="row-hands">82</div>
+          <div class="row-pts">8,750</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:59%"></div></div>
+        </div>
+
+        <!-- Row 10 -->
+        <div class="lb-row">
+          <div class="row-rank">10</div>
+          <div class="row-player">
+            <div class="row-screen">RoyalFlush</div>
+            <div class="row-real">Vikram Singh</div>
+          </div>
+          <div class="row-tbl">TBL-01</div>
+          <div class="row-hands">61</div>
+          <div class="row-pts">8,200</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:55%"></div></div>
+        </div>
+
+      </div>
+      <!-- END LIST -->
+
+    </div>
+    <!-- END LEFT PANEL -->
+
+
+    <!-- ─────────────────────────────────────
+         RIGHT: INFO PANEL
+    ───────────────────────────────────── -->
+    <div class="info-panel">
+
+      <!-- TABLE HEALTH -->
+      <div class="info-section">
+        <div class="info-lbl">Table Status</div>
+        <div class="health-grid">
+
+          <!-- TBL-01 -->
+          <div class="h-card">
+            <div class="h-top">
+              <span class="h-id">TBL-01</span>
+              <span class="h-dot on"></span>
+            </div>
+            <div class="h-count">8<span class="h-of">/8</span></div>
+            <div class="h-bar-w"><div class="h-bar-f on" style="width:100%"></div></div>
+            <div class="h-rate">342 h/hr</div>
+          </div>
+
+          <!-- TBL-02 -->
+          <div class="h-card">
+            <div class="h-top">
+              <span class="h-id">TBL-02</span>
+              <span class="h-dot on"></span>
+            </div>
+            <div class="h-count">7<span class="h-of">/8</span></div>
+            <div class="h-bar-w"><div class="h-bar-f on" style="width:88%"></div></div>
+            <div class="h-rate">289 h/hr</div>
+          </div>
+
+          <!-- TBL-03 -->
+          <div class="h-card">
+            <div class="h-top">
+              <span class="h-id">TBL-03</span>
+              <span class="h-dot on"></span>
+            </div>
+            <div class="h-count">6<span class="h-of">/8</span></div>
+            <div class="h-bar-w"><div class="h-bar-f on" style="width:75%"></div></div>
+            <div class="h-rate">198 h/hr</div>
+          </div>
+
+          <!-- TBL-04 IDLE -->
+          <div class="h-card idle">
+            <div class="h-top">
+              <span class="h-id">TBL-04</span>
+              <span class="h-dot idle"></span>
+            </div>
+            <div class="h-count" style="color:var(--gold2)">3<span class="h-of">/8</span></div>
+            <div class="h-bar-w"><div class="h-bar-f idle" style="width:38%"></div></div>
+            <div class="h-rate" style="color:var(--gold2)">Waiting...</div>
+          </div>
+
+          <!-- TBL-05 -->
+          <div class="h-card">
+            <div class="h-top">
+              <span class="h-id">TBL-05</span>
+              <span class="h-dot on"></span>
+            </div>
+            <div class="h-count">8<span class="h-of">/8</span></div>
+            <div class="h-bar-w"><div class="h-bar-f on" style="width:100%"></div></div>
+            <div class="h-rate">310 h/hr</div>
+          </div>
+
+          <!-- TBL-06 OFFLINE -->
+          <div class="h-card offline">
+            <div class="h-top">
+              <span class="h-id">TBL-06</span>
+              <span class="h-dot off"></span>
+            </div>
+            <div class="h-count" style="color:var(--red)">—</div>
+            <div class="h-bar-w"><div class="h-bar-f off" style="width:0%"></div></div>
+            <div class="h-rate" style="color:var(--red)">Offline</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="info-divider"></div>
+
+      <!-- LAST HAND WINNER -->
+      <div class="info-section">
+        <div class="info-lbl">Last Hand Winner</div>
+        <div class="winner-card">
+          <div class="winner-top-row">
+            <div class="winner-lbl">Hand #144</div>
+            <div class="winner-badge">
+              <span class="winner-badge-dot"></span>
+              Just now
+            </div>
+          </div>
+          <div class="winner-name">ShadowAce</div>
+          <div class="winner-meta">Arjun Mehta &nbsp;·&nbsp; TBL-03</div>
+          <div class="winner-pts-row">
+            <span class="winner-pts">+ $320</span>
+            <span class="winner-pts-lbl">this hand</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOURNAMENT STATS -->
+      <div class="info-section" style="margin-bottom:0;">
+        <div class="info-lbl">Tournament Summary</div>
+        <div class="bottom-stats">
+          <div class="bs-row">
+            <span class="bs-label">Tournament</span>
+            <span class="bs-val">Grand Poker Championship</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Game</span>
+            <span class="bs-val">Texas Hold'em · No Limit</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Started</span>
+            <span class="bs-val">Today · 16:20 IST</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Total Buy-in</span>
+            <span class="bs-val green">$48,200</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Current Leader</span>
+            <span class="bs-val green">ShadowAce · 14,820 pts</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Hands/hr avg</span>
+            <span class="bs-val">228 across 5 tables</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- END RIGHT PANEL -->
+
+  </div>
+  <!-- END BODY -->
+
+
+  <!-- ══════════════════════════════════════════
+       FOOTER TICKER
+  ══════════════════════════════════════════ -->
+  <footer class="tv-foot">
+
+    <div class="ticker-tag">
+      <span class="ticker-dot"></span>
+      Live Updates
+    </div>
+
+    <div class="ticker-scroll">
+      <span class="ev">
+        <strong>ShadowAce</strong> won Hand #144 at TBL-03
+        <span class="tag tag-g">+$320</span>
+      </span>
+      <span class="ev">
+        <strong>NightFold</strong> rebuyed at TBL-01
+        <span class="tag tag-b">Rebuy $1,000</span>
+      </span>
+      <span class="ev">
+        <strong>TBL-04</strong> has 3 players — waiting for more to start
+        <span class="tag tag-gold">Idle</span>
+      </span>
+      <span class="ev">
+        <strong>KingsRansom</strong> registered and badge printed
+        <span class="tag tag-g">New Player</span>
+      </span>
+      <span class="ev">
+        <strong>BluffKing</strong> moved to TBL-02 from TBL-05
+        <span class="tag tag-b">Table Switch</span>
+      </span>
+      <span class="ev">
+        <strong>DarkHorse</strong> marked Sit Out at TBL-05
+        <span class="tag tag-gold">Sit Out</span>
+      </span>
+    </div>
+
+    <div class="ticker-brand">Powered by Predicta</div>
+
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <title>Predicta — Dealer Dashboard · 1200×1920 Tablet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ─────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────── */
+    :root {
+      --bg:        #030A06;
+      --card:      #0A1A0F;
+      --elevated:  #0F2218;
+      --hover:     #142B1E;
+      --border:    #1A3A26;
+      --border-s:  #0D1F14;
+
+      --green:     #37FF7D;
+      --green-10:  rgba(55,255,125,0.10);
+      --green-20:  rgba(55,255,125,0.20);
+      --green-glow: 0 0 24px rgba(55,255,125,0.18);
+
+      --blue:      #47B8FF;
+      --blue-10:   rgba(71,184,255,0.10);
+      --gold:      #FFB547;
+      --gold-10:   rgba(255,181,71,0.10);
+      --red:       #FF4747;
+      --red-10:    rgba(255,71,71,0.10);
+
+      --t1: #FFFFFF;
+      --t2: #8BA89A;
+      --t3: #4A6B57;
+
+      --font: 'VoldaSans', 'Rajdhani', system-ui, sans-serif;
+
+      /* Touch target minimum */
+      --touch: 56px;
+    }
+
+    /* ─────────────────────────────────
+       RESET
+    ───────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1200px;
+      height: 1920px;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--t1);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─────────────────────────────────
+       LAYOUT SHELL
+    ───────────────────────────────── */
+    .dealer-app {
+      width: 1200px;
+      height: 1920px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════
+       STATUS BAR (top-most, 48px)
+    ══════════════════════════════════ */
+    .status-bar {
+      height: 48px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-s);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .sb-time { font-size: 13px; font-weight: 600; color: var(--t2); letter-spacing: 0.5px; }
+    .sb-space { flex: 1; }
+    .sb-conn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; color: var(--green);
+      letter-spacing: 0.5px;
+    }
+    .sb-conn-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+    /* ══════════════════════════════════
+       TABLE HEADER (90px)
+    ══════════════════════════════════ */
+    .table-header {
+      height: 90px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .th-logo {
+      width: 50px; height: 50px;
+      background: var(--green);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700;
+      color: #030A06; flex-shrink: 0;
+    }
+    .th-info { flex: 1; min-width: 0; }
+    .th-table-id { font-size: 26px; font-weight: 700; color: var(--t1); letter-spacing: 0.3px; }
+    .th-tourn { font-size: 13px; color: var(--t2); margin-top: 2px; }
+    .th-game  { font-size: 12px; color: var(--t3); }
+
+    .th-status {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+    }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px;
+      border-radius: 24px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .s-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .badge-live   { background: var(--green-10); color: var(--green); border: 1.5px solid rgba(55,255,125,0.3); }
+    .badge-live .s-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.6s infinite; }
+    .badge-idle   { background: var(--gold-10);  color: var(--gold);  border: 1.5px solid rgba(255,181,71,0.3); }
+    .badge-idle .s-dot { background: var(--gold); }
+    .badge-cashgm { background: var(--elevated); color: var(--t2);    border: 1.5px solid var(--border); }
+    .badge-cashgm .s-dot { background: var(--t3); }
+
+    .th-hand { font-size: 12px; color: var(--t3); }
+
+    /* ══════════════════════════════════
+       STATS ROW (120px)
+    ══════════════════════════════════ */
+    .stats-row {
+      height: 120px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .stat-cell {
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center;
+      gap: 4px;
+      padding: 0 20px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      cursor: default;
+    }
+    .stat-cell:last-child { border-right: none; }
+
+    .sc-val   { font-size: 38px; font-weight: 700; color: var(--t1); line-height: 1; letter-spacing: -1px; }
+    .sc-val.green { color: var(--green); }
+    .sc-val.gold  { color: var(--gold); }
+    .sc-lbl   { font-size: 11px; font-weight: 600; color: var(--t3); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    /* ══════════════════════════════════
+       POKER TABLE VISUAL (590px)
+    ══════════════════════════════════ */
+    .table-view {
+      height: 590px;
+      position: relative;
+      flex-shrink: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Table felt oval */
+    .felt-oval {
+      position: absolute;
+      left: 220px;   /* cx=600 - rx=380 */
+      top:  128px;   /* cy=295 - ry=167 */
+      width: 760px;  /* rx*2 */
+      height: 334px; /* ry*2 */
+      border-radius: 50%;
+
+      /* Dark green felt gradient */
+      background: radial-gradient(
+        ellipse at center,
+        #0D2418 0%,
+        #071610 50%,
+        #040E09 100%
+      );
+      border: 2px solid #1A3A26;
+      box-shadow:
+        inset 0 0 60px rgba(0,0,0,0.6),
+        0 0 40px rgba(0,0,0,0.5);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Felt inner ring */
+    .felt-ring {
+      width: 640px; height: 240px;
+      border-radius: 50%;
+      border: 1px solid rgba(55,255,125,0.08);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px;
+    }
+
+    .felt-game-label {
+      font-size: 15px; font-weight: 600;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+    .felt-variant {
+      font-size: 22px; font-weight: 700;
+      color: rgba(55,255,125,0.35);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .felt-hand-info {
+      font-size: 13px;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 1px;
+    }
+
+    /* ── SEAT CARDS ── */
+    /* Seat card: 148×108px, touch-friendly */
+    .seat {
+      position: absolute;
+      width: 148px;
+      height: 108px;
+    }
+
+    .seat-card {
+      width: 100%; height: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .seat-card:hover { border-color: rgba(55,255,125,0.5); background: var(--elevated); }
+
+    /* Status accent top line */
+    .seat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2.5px;
+      border-radius: 14px 14px 0 0;
+    }
+    .seat-card.playing::before  { background: var(--green); }
+    .seat-card.sitout::before   { background: var(--gold); }
+    .seat-card.empty::before    { background: var(--border); }
+
+    /* Empty seat styling */
+    .seat-card.empty {
+      border-style: dashed;
+      border-color: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(10,26,15,0.5);
+    }
+    .seat-card.empty:hover { border-color: var(--green); border-style: solid; }
+
+    .seat-num {
+      font-size: 10px; font-weight: 700;
+      color: var(--t3); letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .seat-name { font-size: 15px; font-weight: 700; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seat-chips { font-size: 13px; font-weight: 600; color: var(--green); }
+    .seat-status-wrap { display: flex; align-items: center; justify-content: space-between; }
+
+    .seat-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 9px; font-weight: 700;
+      padding: 2px 6px; border-radius: 10px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .sb-playing { color: var(--green); background: var(--green-10); }
+    .sb-sitout  { color: var(--gold);  background: var(--gold-10); }
+
+    .seat-action {
+      width: 24px; height: 24px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      color: var(--t2);
+      transition: border-color 0.12s, color 0.12s;
+    }
+    .seat-action:hover { border-color: var(--green); color: var(--green); }
+
+    .seat-add-content {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 5px;
+      color: var(--t3);
+    }
+    .seat-add-icon { font-size: 22px; font-weight: 300; color: var(--t3); }
+    .seat-add-label { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: var(--t3); }
+    .seat-card.empty:hover .seat-add-icon  { color: var(--green); }
+    .seat-card.empty:hover .seat-add-label { color: var(--green); }
+    .seat-card.empty:hover .seat-add-content { color: var(--green); }
+
+    /* SEAT POSITIONS (centered in 1200px, oval centered at 600,295) */
+    /* rx=380, ry=167, card: 148×108, half: 74×54 */
+    /* Angle from top (clockwise), 8 seats at 45° intervals */
+    /* Formula: x = cx + rx*sin(angle), y = cy - ry*cos(angle) */
+    /* top-left corner: x-74, y-54 */
+
+    /* Seat 1: 0° top     sin=0.000 cos=1.000  →  x=600+0=600,   y=295-167=128  → left=526, top=74 */
+    .seat[data-s="1"] { left: 526px; top: 74px; }
+    /* Seat 2: 45°         sin=0.707 cos=0.707  →  x=600+269=869, y=295-118=177  → left=795, top=123 */
+    .seat[data-s="2"] { left: 795px; top: 123px; }
+    /* Seat 3: 90° right   sin=1.000 cos=0.000  →  x=600+380=980, y=295-0=295    → left=906, top=241 */
+    .seat[data-s="3"] { left: 906px; top: 241px; }
+    /* Seat 4: 135°        sin=0.707 cos=-0.707 →  x=869,         y=295+118=413  → left=795, top=359 */
+    .seat[data-s="4"] { left: 795px; top: 359px; }
+    /* Seat 5: 180° bot    sin=0.000 cos=-1.000 →  x=600,         y=295+167=462  → left=526, top=408 */
+    .seat[data-s="5"] { left: 526px; top: 408px; }
+    /* Seat 6: 225°        sin=-0.707 cos=-0.707→  x=600-269=331, y=413          → left=257, top=359 */
+    .seat[data-s="6"] { left: 257px; top: 359px; }
+    /* Seat 7: 270° left   sin=-1.000 cos=0.000 →  x=600-380=220, y=295          → left=146, top=241 */
+    .seat[data-s="7"] { left: 146px; top: 241px; }
+    /* Seat 8: 315°        sin=-0.707 cos=0.707 →  x=331,         y=177          → left=257, top=123 */
+    .seat[data-s="8"] { left: 257px; top: 123px; }
+
+    /* ══════════════════════════════════
+       PLAYER LIST (scrollable, 988px)
+    ══════════════════════════════════ */
+    .player-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ps-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 28px 14px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .ps-title { font-size: 15px; font-weight: 700; color: var(--t1); }
+    .ps-sub   { font-size: 12px; color: var(--t3); margin-top: 2px; }
+
+    .ps-add-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 20px; height: 48px;
+      background: var(--green); color: #030A06;
+      border: none; border-radius: 10px;
+      font-family: var(--font); font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.5px;
+      transition: background 0.12s;
+    }
+    .ps-add-btn:hover { background: #4AFFA0; }
+
+    .player-list { flex: 1; overflow-y: auto; padding: 16px 28px; display: flex; flex-direction: column; gap: 10px; }
+    .player-list::-webkit-scrollbar { width: 4px; }
+    .player-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Player row card */
+    .pl-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.15s, background 0.15s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .pl-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 14px 0 0 14px;
+    }
+    .pl-card.playing::before { background: var(--green); }
+    .pl-card.sitout::before  { background: var(--gold); }
+    .pl-card:hover { border-color: rgba(55,255,125,0.4); background: var(--elevated); }
+
+    .pl-seat-num {
+      width: 44px; height: 44px;
+      background: var(--elevated);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700;
+      color: var(--t2);
+    }
+
+    .pl-info { min-width: 0; }
+    .pl-screen { font-size: 18px; font-weight: 700; color: var(--t1); }
+    .pl-real   { font-size: 12px; color: var(--t3); margin-top: 2px; }
+
+    .pl-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .pl-chips { font-size: 16px; font-weight: 700; color: var(--green); }
+    .pl-sep   { width: 1px; height: 14px; background: var(--border); }
+    .pl-pts   { font-size: 14px; font-weight: 600; color: var(--t2); }
+
+    .pl-actions { display: flex; gap: 8px; align-items: center; }
+
+    .pl-act-btn {
+      height: 44px;
+      padding: 0 16px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      color: var(--t2);
+      cursor: pointer;
+      transition: all 0.12s;
+      white-space: nowrap;
+    }
+    .pl-act-btn:hover { border-color: var(--t2); color: var(--t1); }
+    .pl-act-btn.rebuy:hover { border-color: var(--green); color: var(--green); }
+    .pl-act-btn.sitout:hover { border-color: var(--gold); color: var(--gold); }
+    .pl-act-btn.detach:hover { border-color: var(--red); color: var(--red); }
+
+    /* Wallet lock indicator */
+    .wallet-lock {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700;
+      color: var(--red); letter-spacing: 0.5px;
+      padding: 2px 7px;
+      background: var(--red-10);
+      border: 1px solid rgba(255,71,71,0.3);
+      border-radius: 8px;
+    }
+
+    /* Empty seat row */
+    .pl-card.empty-row {
+      border-style: dashed;
+      border-color: var(--border-s);
+      background: rgba(10,26,15,0.4);
+      cursor: default;
+    }
+    .pl-card.empty-row .pl-seat-num { color: var(--t3); border-style: dashed; }
+    .pl-card.empty-row:hover { border-color: var(--green); border-style: dashed; }
+
+    .pl-empty-label { font-size: 16px; font-weight: 600; color: var(--t3); }
+    .pl-empty-sub   { font-size: 12px; color: var(--t3); margin-top: 2px; opacity: 0.6; }
+
+    /* ══════════════════════════════════
+       BOTTOM ACTION BAR (80px, sticky)
+    ══════════════════════════════════ */
+    .bottom-bar {
+      height: 80px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .bb-info { flex: 1; }
+    .bb-status { font-size: 14px; font-weight: 600; color: var(--t2); }
+    .bb-warn   { font-size: 12px; color: var(--gold); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+    .bb-ok     { font-size: 12px; color: var(--green); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+
+    .bb-btn {
+      height: 56px;
+      padding: 0 28px;
+      border-radius: 12px;
+      font-family: var(--font); font-size: 15px; font-weight: 700;
+      cursor: pointer; border: none;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .bb-btn-ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--t2);
+    }
+    .bb-btn-ghost:hover { border-color: var(--t2); color: var(--t1); }
+    .bb-btn-primary {
+      background: var(--green);
+      color: #030A06;
+    }
+    .bb-btn-primary:hover { background: #4AFFA0; }
+    .bb-btn-primary:disabled, .bb-btn-primary.disabled {
+      background: var(--elevated);
+      color: var(--t3);
+      cursor: not-allowed;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="dealer-app">
+
+  <!-- ════════════════════════════════════
+       STATUS BAR
+  ════════════════════════════════════ -->
+  <div class="status-bar">
+    <span class="sb-time">Thu 27 Feb 2026 &nbsp;·&nbsp; 19:42 IST</span>
+    <div class="sb-space"></div>
+    <div class="sb-conn">
+      <span class="sb-conn-dot"></span>
+      Tournament Server Connected
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════
+       TABLE HEADER
+  ════════════════════════════════════ -->
+  <div class="table-header">
+    <div class="th-logo">PT</div>
+    <div class="th-info">
+      <div class="th-table-id">TBL-03</div>
+      <div class="th-tourn">Grand Poker Championship</div>
+      <div class="th-game">Texas Hold'em · No Limit</div>
+    </div>
+    <div class="th-status">
+      <div class="status-badge badge-live">
+        <span class="s-dot"></span>
+        Live Tournament
+      </div>
+      <div class="th-hand" style="font-size:13px;color:var(--t3);">Hand #144 &nbsp;·&nbsp; 6 players active</div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════
+       STATS ROW
+  ════════════════════════════════════ -->
+  <div class="stats-row">
+
+    <div class="stat-cell">
+      <div class="sc-val green">6 / 8</div>
+      <div class="sc-lbl">Players Seated</div>
+    </div>
+
+    <div class="stat-cell">
+      <div class="sc-val">144</div>
+      <div class="sc-lbl">Hands Played</div>
+    </div>
+
+    <div class="stat-cell">
+      <div class="sc-val gold">#1</div>
+      <div class="sc-lbl">Table Ranking</div>
+    </div>
+
+  </div>
+
+
+  <!-- ════════════════════════════════════
+       POKER TABLE VISUAL
+  ════════════════════════════════════ -->
+  <div class="table-view">
+
+    <!-- Felt Oval -->
+    <div class="felt-oval">
+      <div class="felt-ring">
+        <div class="felt-game-label">Poker</div>
+        <div class="felt-variant">Texas Hold'em</div>
+        <div class="felt-hand-info">Hand #144 &nbsp;·&nbsp; No Limit</div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 1 — Top Center (ShadowAce, Playing) ── -->
+    <div class="seat" data-s="1">
+      <div class="seat-card playing">
+        <div class="seat-num">Seat 1</div>
+        <div class="seat-name">ShadowAce</div>
+        <div class="seat-chips">$2,400</div>
+        <div class="seat-status-wrap">
+          <div class="seat-badge sb-playing">● Playing</div>
+          <div class="seat-action">···</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 2 — Top Right (NightFold, Playing) ── -->
+    <div class="seat" data-s="2">
+      <div class="seat-card playing">
+        <div class="seat-num">Seat 2</div>
+        <div class="seat-name">NightFold</div>
+        <div class="seat-chips">$1,850</div>
+        <div class="seat-status-wrap">
+          <div class="seat-badge sb-playing">● Playing</div>
+          <div class="seat-action">···</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 3 — Right (BluffKing, Sit Out) ── -->
+    <div class="seat" data-s="3">
+      <div class="seat-card sitout">
+        <div class="seat-num">Seat 3</div>
+        <div class="seat-name">BluffKing</div>
+        <div class="seat-chips">$3,200</div>
+        <div class="seat-status-wrap">
+          <div class="seat-badge sb-sitout" style="color:var(--gold);background:var(--gold-10);">⏸ Sit Out</div>
+          <div class="seat-action">···</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 4 — Bottom Right (CardShark, Playing) ── -->
+    <div class="seat" data-s="4">
+      <div class="seat-card playing">
+        <div class="seat-num">Seat 4</div>
+        <div class="seat-name">CardShark</div>
+        <div class="seat-chips">$900</div>
+        <div class="seat-status-wrap">
+          <div class="seat-badge sb-playing">● Playing</div>
+          <div class="seat-action">···</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 5 — Bottom Center (Empty) ── -->
+    <div class="seat" data-s="5">
+      <div class="seat-card empty">
+        <div class="seat-add-content">
+          <div class="seat-add-icon">+</div>
+          <div class="seat-add-label">Add Player</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 6 — Bottom Left (RiverBoss, Playing) ── -->
+    <div class="seat" data-s="6">
+      <div class="seat-card playing">
+        <div class="seat-num">Seat 6</div>
+        <div class="seat-name">RiverBoss</div>
+        <div class="seat-chips">$1,100</div>
+        <div class="seat-status-wrap">
+          <div class="seat-badge sb-playing">● Playing</div>
+          <div class="seat-action">···</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 7 — Left (AceDeep, Playing) ── -->
+    <div class="seat" data-s="7">
+      <div class="seat-card playing">
+        <div class="seat-num">Seat 7</div>
+        <div class="seat-name">AceDeep</div>
+        <div class="seat-chips">$2,050</div>
+        <div class="seat-status-wrap">
+          <div class="seat-badge sb-playing">● Playing</div>
+          <div class="seat-action">···</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEAT 8 — Top Left (Empty) ── -->
+    <div class="seat" data-s="8">
+      <div class="seat-card empty">
+        <div class="seat-add-content">
+          <div class="seat-add-icon">+</div>
+          <div class="seat-add-label">Add Player</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- END TABLE VIEW -->
+
+
+  <!-- ════════════════════════════════════
+       PLAYER LIST SECTION
+  ════════════════════════════════════ -->
+  <div class="player-section">
+
+    <!-- Section header -->
+    <div class="ps-head">
+      <div>
+        <div class="ps-title">Seated Players</div>
+        <div class="ps-sub">6 active &nbsp;·&nbsp; 1 sitting out &nbsp;·&nbsp; 2 seats open</div>
+      </div>
+      <button class="ps-add-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Onboard Player
+      </button>
+    </div>
+
+    <!-- Player rows -->
+    <div class="player-list">
+
+      <!-- Player 1: ShadowAce -->
+      <div class="pl-card playing">
+        <div class="pl-seat-num">1</div>
+        <div class="pl-info">
+          <div class="pl-screen">ShadowAce</div>
+          <div class="pl-real">Arjun Mehta</div>
+          <div class="pl-meta">
+            <span class="pl-chips">$2,400</span>
+            <span class="pl-sep"></span>
+            <span class="pl-pts">14,820 pts</span>
+            <span class="wallet-lock">🔒 Locked</span>
+          </div>
+        </div>
+        <div class="pl-actions">
+          <button class="pl-act-btn rebuy">+ Rebuy</button>
+          <button class="pl-act-btn sitout">Sit Out</button>
+          <button class="pl-act-btn detach">Detach</button>
+        </div>
+      </div>
+
+      <!-- Player 2: NightFold -->
+      <div class="pl-card playing">
+        <div class="pl-seat-num">2</div>
+        <div class="pl-info">
+          <div class="pl-screen">NightFold</div>
+          <div class="pl-real">Priya Sharma</div>
+          <div class="pl-meta">
+            <span class="pl-chips">$1,850</span>
+            <span class="pl-sep"></span>
+            <span class="pl-pts">13,445 pts</span>
+            <span class="wallet-lock">🔒 Locked</span>
+          </div>
+        </div>
+        <div class="pl-actions">
+          <button class="pl-act-btn rebuy">+ Rebuy</button>
+          <button class="pl-act-btn sitout">Sit Out</button>
+          <button class="pl-act-btn detach">Detach</button>
+        </div>
+      </div>
+
+      <!-- Player 3: BluffKing (Sit Out) -->
+      <div class="pl-card sitout">
+        <div class="pl-seat-num">3</div>
+        <div class="pl-info">
+          <div class="pl-screen">BluffKing</div>
+          <div class="pl-real">Rahul Das</div>
+          <div class="pl-meta">
+            <span class="pl-chips">$3,200</span>
+            <span class="pl-sep"></span>
+            <span class="pl-pts">12,100 pts</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.5px;padding:2px 7px;background:var(--gold-10);border:1px solid rgba(255,181,71,0.3);border-radius:8px;">⏸ Sit Out</span>
+          </div>
+        </div>
+        <div class="pl-actions">
+          <button class="pl-act-btn rebuy">+ Rebuy</button>
+          <button class="pl-act-btn" style="color:var(--green);border-color:var(--green);">Resume</button>
+          <button class="pl-act-btn detach">Detach</button>
+        </div>
+      </div>
+
+      <!-- Player 4: CardShark -->
+      <div class="pl-card playing">
+        <div class="pl-seat-num">4</div>
+        <div class="pl-info">
+          <div class="pl-screen">CardShark</div>
+          <div class="pl-real">Karan Tiwari</div>
+          <div class="pl-meta">
+            <span class="pl-chips">$900</span>
+            <span class="pl-sep"></span>
+            <span class="pl-pts">11,780 pts</span>
+            <span class="wallet-lock">🔒 Locked</span>
+          </div>
+        </div>
+        <div class="pl-actions">
+          <button class="pl-act-btn rebuy">+ Rebuy</button>
+          <button class="pl-act-btn sitout">Sit Out</button>
+          <button class="pl-act-btn detach">Detach</button>
+        </div>
+      </div>
+
+      <!-- Seat 5: Empty -->
+      <div class="pl-card empty-row">
+        <div class="pl-seat-num">5</div>
+        <div class="pl-info">
+          <div class="pl-empty-label">Seat 5 — Open</div>
+          <div class="pl-empty-sub">Waiting for player</div>
+        </div>
+        <div class="pl-actions">
+          <button class="ps-add-btn" style="height:44px;font-size:13px;">+ Onboard</button>
+        </div>
+      </div>
+
+      <!-- Player 6: RiverBoss -->
+      <div class="pl-card playing">
+        <div class="pl-seat-num">6</div>
+        <div class="pl-info">
+          <div class="pl-screen">RiverBoss</div>
+          <div class="pl-real">Divya Patel</div>
+          <div class="pl-meta">
+            <span class="pl-chips">$1,100</span>
+            <span class="pl-sep"></span>
+            <span class="pl-pts">10,990 pts</span>
+            <span class="wallet-lock">🔒 Locked</span>
+          </div>
+        </div>
+        <div class="pl-actions">
+          <button class="pl-act-btn rebuy">+ Rebuy</button>
+          <button class="pl-act-btn sitout">Sit Out</button>
+          <button class="pl-act-btn detach">Detach</button>
+        </div>
+      </div>
+
+      <!-- Player 7: AceDeep -->
+      <div class="pl-card playing">
+        <div class="pl-seat-num">7</div>
+        <div class="pl-info">
+          <div class="pl-screen">AceDeep</div>
+          <div class="pl-real">Sonal Roy</div>
+          <div class="pl-meta">
+            <span class="pl-chips">$2,050</span>
+            <span class="pl-sep"></span>
+            <span class="pl-pts">10,450 pts</span>
+            <span class="wallet-lock">🔒 Locked</span>
+          </div>
+        </div>
+        <div class="pl-actions">
+          <button class="pl-act-btn rebuy">+ Rebuy</button>
+          <button class="pl-act-btn sitout">Sit Out</button>
+          <button class="pl-act-btn detach">Detach</button>
+        </div>
+      </div>
+
+      <!-- Seat 8: Empty -->
+      <div class="pl-card empty-row">
+        <div class="pl-seat-num">8</div>
+        <div class="pl-info">
+          <div class="pl-empty-label">Seat 8 — Open</div>
+          <div class="pl-empty-sub">Waiting for player</div>
+        </div>
+        <div class="pl-actions">
+          <button class="ps-add-btn" style="height:44px;font-size:13px;">+ Onboard</button>
+        </div>
+      </div>
+
+    </div>
+    <!-- END PLAYER LIST -->
+
+  </div>
+  <!-- END PLAYER SECTION -->
+
+
+  <!-- ════════════════════════════════════
+       BOTTOM ACTION BAR
+  ════════════════════════════════════ -->
+  <div class="bottom-bar">
+    <div class="bb-info">
+      <div class="bb-status">6 players seated &nbsp;·&nbsp; Game active</div>
+      <div class="bb-ok">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Min. 3 players reached — hand controls enabled
+      </div>
+    </div>
+    <button class="bb-btn bb-btn-ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Table Info
+    </button>
+    <button class="bb-btn bb-btn-ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Detach Table
+    </button>
+    <button class="bb-btn bb-btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start Next Hand
+    </button>
+  </div>
+
+</div>
+
+</body>
+</html>

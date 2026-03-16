@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>Predicta — Table Topper Display · TBL-03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #030A06;
+    --bg-card: #0A1A0F;
+    --bg-elevated: #0F2218;
+    --bg-hover: #142B1E;
+    --border: #1A3A26;
+    --border-sub: #0D1F14;
+    --green: #37FF7D;
+    --green-10: rgba(55,255,125,0.10);
+    --green-glow: 0 0 20px rgba(55,255,125,0.18);
+    --blue: #47B8FF;
+    --blue-10: rgba(71,184,255,0.10);
+    --gold: #FFB547;
+    --gold-10: rgba(255,181,71,0.10);
+    --red: #FF4747;
+    --red-10: rgba(255,71,71,0.10);
+    --t-primary: #FFFFFF;
+    --t-secondary: #8BA89A;
+    --t-muted: #4A6B57;
+    --t-on-green: #030A06;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 1280px;
+    height: 800px;
+    overflow: hidden;
+    background: var(--bg-base);
+    font-family: 'VoldaSans', 'Rajdhani', 'Exo 2', system-ui, sans-serif;
+    color: var(--t-primary);
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 1280px;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    height: 56px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-table-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .topbar-dot {
+    color: var(--t-muted);
+    font-size: 16px;
+  }
+
+  .topbar-event-name {
+    font-size: 14px;
+    color: var(--t-secondary);
+  }
+
+  .live-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-10);
+    border: 1px solid rgba(55,255,125,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(55,255,125,0.5); }
+    50% { opacity: 0.85; transform: scale(1.15); box-shadow: 0 0 0 4px rgba(55,255,125,0); }
+  }
+
+  /* ── MAIN AREA ── */
+  .main-area {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 60% 40%;
+    height: calc(100vh - 56px - 40px);
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    padding: 28px 24px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .tournament-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .game-chips-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .game-chip {
+    background: var(--blue-10);
+    color: var(--blue);
+    border: 1px solid rgba(71,184,255,0.25);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+  }
+
+  .tournament-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--t-primary);
+    letter-spacing: -0.3px;
+    margin-top: 10px;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  /* ── STANDINGS TABLE ── */
+  .standings-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--t-muted);
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
+  .standings-table {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .standings-header {
+    background: var(--bg-elevated);
+    padding: 8px 14px;
+    display: grid;
+    grid-template-columns: 32px 1fr 80px 64px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .standings-header span {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--t-muted);
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+
+  .standings-header .col-points,
+  .standings-header .col-hands {
+    text-align: right;
+  }
+
+  .standings-header .col-hands {
+    text-align: center;
+  }
+
+  .standings-row {
+    padding: 11px 14px;
+    display: grid;
+    grid-template-columns: 32px 1fr 80px 64px;
+    gap: 8px;
+    align-items: center;
+    border-bottom: 1px solid var(--border-sub);
+    position: relative;
+    transition: background 0.15s;
+  }
+
+  .standings-row:last-child {
+    border-bottom: none;
+  }
+
+  .standings-row.rank-1 {
+    border-left: 3px solid var(--gold);
+    padding-left: 11px;
+  }
+
+  .standings-row:hover {
+    background: var(--bg-hover);
+  }
+
+  .rank-badge {
+    font-size: 16px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .rank-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--t-muted);
+    text-align: center;
+  }
+
+  .player-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--t-primary);
+  }
+
+  .player-points {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .player-hands {
+    font-size: 12px;
+    color: var(--t-secondary);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    padding: 28px 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    overflow: hidden;
+  }
+
+  /* ── HAND COUNTER ── */
+  .hand-counter-section {
+    text-align: center;
+    width: 100%;
+  }
+
+  .hand-number {
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--t-primary);
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-top: 4px;
+  }
+
+  .game-status {
+    font-size: 10px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  /* ── SEATS ── */
+  .seats-section {
+    text-align: center;
+    width: 100%;
+  }
+
+  .seat-dots-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .seat-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+  }
+
+  .seat-dot.occupied {
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(55,255,125,0.4);
+  }
+
+  .seat-dot.empty {
+    border: 2px solid var(--border);
+    background: transparent;
+  }
+
+  .seats-info {
+    font-size: 12px;
+    color: var(--t-secondary);
+    margin-top: 8px;
+  }
+
+  /* ── LAST WINNER ── */
+  .last-winner-card {
+    background: var(--gold-10);
+    border: 1px solid rgba(255,181,71,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .winner-trophy {
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .winner-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--t-muted);
+    letter-spacing: 1.5px;
+  }
+
+  .winner-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+
+  .winner-pts {
+    font-size: 14px;
+    color: var(--t-secondary);
+  }
+
+  /* ── CLOCK ── */
+  .clock {
+    margin-top: auto;
+    text-align: center;
+    width: 100%;
+  }
+
+  .clock-time {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--t-muted);
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 2px;
+  }
+
+  /* ── BOTTOM BAR ── */
+  .bottom-bar {
+    height: 40px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .bottom-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--t-muted);
+  }
+
+  .bottom-green-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .bottom-right {
+    font-size: 10px;
+    color: var(--t-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-table-id">TBL-03</span>
+      <span class="topbar-dot">·</span>
+      <span class="topbar-event-name">Grand Poker Championship</span>
+    </div>
+    <div class="live-pill">
+      <span class="live-dot"></span>
+      LIVE TOURNAMENT
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <!-- Tournament Section -->
+      <div class="tournament-section">
+        <div class="game-chips-row">
+          <span class="game-chip">♠ Poker</span>
+          <span class="game-chip">Texas Hold'em</span>
+          <span class="game-chip">No Limit</span>
+        </div>
+        <div class="tournament-name">Grand Poker Championship</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Standings Section -->
+      <div class="standings-section">
+        <div class="section-label">Current Table Standings</div>
+        <div class="standings-table">
+          <!-- Header -->
+          <div class="standings-header">
+            <span>#</span>
+            <span>Player</span>
+            <span class="col-points">Points</span>
+            <span class="col-hands">Hands</span>
+          </div>
+          <!-- Row 1 -->
+          <div class="standings-row rank-1">
+            <span class="rank-badge">🥇</span>
+            <span class="player-name">ShadowAce</span>
+            <span class="player-points">14,820</span>
+            <span class="player-hands">88</span>
+          </div>
+          <!-- Row 2 -->
+          <div class="standings-row">
+            <span class="rank-badge">🥈</span>
+            <span class="player-name">BluffKing</span>
+            <span class="player-points">12,100</span>
+            <span class="player-hands">91</span>
+          </div>
+          <!-- Row 3 -->
+          <div class="standings-row">
+            <span class="rank-badge">🥉</span>
+            <span class="player-name">RiverBoss</span>
+            <span class="player-points">10,990</span>
+            <span class="player-hands">58</span>
+          </div>
+          <!-- Row 4 -->
+          <div class="standings-row">
+            <span class="rank-num">4</span>
+            <span class="player-name">CardShark</span>
+            <span class="player-points">11,780</span>
+            <span class="player-hands">65</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <!-- Hand Counter -->
+      <div class="hand-counter-section">
+        <div class="section-label">Current Hand</div>
+        <div class="hand-number">#144</div>
+        <div class="game-status">Game in Progress</div>
+      </div>
+
+      <div class="divider" style="width:100%;"></div>
+
+      <!-- Seats -->
+      <div class="seats-section">
+        <div class="section-label">Players Seated</div>
+        <div class="seat-dots-row">
+          <div class="seat-dot occupied"></div>
+          <div class="seat-dot occupied"></div>
+          <div class="seat-dot occupied"></div>
+          <div class="seat-dot occupied"></div>
+          <div class="seat-dot occupied"></div>
+          <div class="seat-dot occupied"></div>
+          <div class="seat-dot empty"></div>
+          <div class="seat-dot empty"></div>
+        </div>
+        <div class="seats-info">6 / 8 seats occupied</div>
+      </div>
+
+      <div class="divider" style="width:100%;"></div>
+
+      <!-- Last Winner -->
+      <div class="last-winner-card">
+        <div class="winner-trophy">🏆</div>
+        <div class="winner-label">Last Hand Winner</div>
+        <div class="winner-name">ShadowAce</div>
+        <div class="winner-pts">+320 pts</div>
+      </div>
+
+      <!-- Clock -->
+      <div class="clock">
+        <div class="clock-time" id="clock">--:--:--</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="bottom-left">
+      <div class="bottom-green-dot"></div>
+      Updates every hand
+    </div>
+    <div class="bottom-right">Powered by PREDICTA</div>
+  </div>
+
+</div>
+
+<script>
+  function updateClock() {
+    const el = document.getElementById('clock');
+    el.textContent = new Date().toLocaleTimeString();
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

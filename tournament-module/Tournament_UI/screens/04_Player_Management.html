@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>Predicta Tournament — Player Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg-base:#030A06;--bg-card:#0A1A0F;--bg-elevated:#0F2218;--bg-hover:#142B1E;--border:#1A3A26;--border-sub:#0D1F14;--green:#37FF7D;--green-10:rgba(55,255,125,0.10);--green-20:rgba(55,255,125,0.20);--green-glow:0 0 20px rgba(55,255,125,0.18);--blue:#47B8FF;--blue-10:rgba(71,184,255,0.10);--gold:#FFB547;--gold-10:rgba(255,181,71,0.10);--red:#FF4747;--red-10:rgba(255,71,71,0.10);--t-primary:#FFFFFF;--t-secondary:#8BA89A;--t-muted:#4A6B57;--t-on-green:#030A06;--font:'VoldaSans','Rajdhani','Exo 2',system-ui,sans-serif;--r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{width:1440px;min-height:900px;background:var(--bg-base);color:var(--t-primary);font-family:var(--font);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+    .app{display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:240px;flex-shrink:0;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;}
+    .logo{display:flex;align-items:center;gap:10px;padding:22px 20px;border-bottom:1px solid var(--border);}
+    .logo-mark{width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--t-on-green);flex-shrink:0;}
+    .logo-name{font-size:15px;font-weight:700;color:var(--t-primary);letter-spacing:0.4px;}
+    .logo-tag{font-size:9px;font-weight:600;color:var(--t-muted);letter-spacing:1.8px;text-transform:uppercase;}
+    .nav{flex:1;padding:12px 0;overflow-y:auto;}.nav::-webkit-scrollbar{display:none;}
+    .nav-label{padding:10px 20px 4px;font-size:9px;font-weight:700;color:var(--t-muted);letter-spacing:2px;text-transform:uppercase;}
+    .nav-item{display:flex;align-items:center;gap:11px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--t-secondary);cursor:pointer;transition:background 0.12s,color 0.12s;position:relative;user-select:none;}
+    .nav-item:hover{background:var(--bg-hover);color:var(--t-primary);}
+    .nav-item.active{background:var(--green-10);color:var(--green);}
+    .nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:0 3px 3px 0;}
+    .nav-badge{margin-left:auto;background:var(--green);color:var(--t-on-green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;}
+    .sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .avatar{width:32px;height:32px;background:var(--green-10);border:1.5px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green);flex-shrink:0;}
+    .user-name{font-size:12px;font-weight:600;color:var(--t-primary);}
+    .user-role{font-size:9px;font-weight:600;color:var(--t-muted);letter-spacing:1px;text-transform:uppercase;}
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;}
+    .topbar{height:60px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0;}
+    .topbar-title{flex:1;}
+    .topbar-title h1{font-size:17px;font-weight:700;color:var(--t-primary);}
+    .topbar-title p{font-size:12px;color:var(--t-muted);margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:10px;}
+    .icon-btn{width:36px;height:36px;background:transparent;border:1px solid var(--border);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t-secondary);transition:border-color 0.12s,color 0.12s;}
+    .icon-btn:hover{border-color:var(--t-muted);color:var(--t-primary);}
+    .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:0 14px;height:36px;background:transparent;border:1px solid var(--border);border-radius:var(--r-md);font-family:var(--font);font-size:12px;font-weight:600;color:var(--t-secondary);cursor:pointer;transition:all 0.12s;}
+    .btn-ghost:hover{border-color:var(--t-muted);color:var(--t-primary);}
+    .btn-primary{display:inline-flex;align-items:center;gap:7px;padding:0 16px;height:36px;background:var(--green);color:var(--t-on-green);border:none;border-radius:var(--r-md);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:background 0.12s;letter-spacing:0.3px;}
+    .btn-primary:hover{background:#4AFFA0;}
+
+    .content{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px;}
+    .content::-webkit-scrollbar{width:4px;}
+    .content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+    /* STAT ROW */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
+    .stat-label{font-size:10px;font-weight:700;color:var(--t-muted);letter-spacing:1.2px;text-transform:uppercase;}
+    .stat-val{font-size:28px;font-weight:700;color:var(--t-primary);letter-spacing:-0.5px;}
+    .stat-sub{font-size:11px;color:var(--t-secondary);}
+    .stat-sub span{color:var(--green);font-weight:600;}
+
+    /* FILTER BAR */
+    .filter-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-xl);padding:14px 20px;display:flex;align-items:center;gap:12px;}
+    .search-wrap{flex:1;position:relative;}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t-muted);}
+    .search-input{width:100%;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);padding:9px 14px 9px 36px;color:var(--t-primary);font-family:var(--font);font-size:13px;outline:none;transition:border-color 0.15s;}
+    .search-input:focus{border-color:var(--green);}
+    .search-input::placeholder{color:var(--t-muted);}
+    .filter-sep{width:1px;height:24px;background:var(--border);}
+    .filter-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);font-family:var(--font);font-size:12px;font-weight:600;color:var(--t-secondary);cursor:pointer;transition:all 0.12s;white-space:nowrap;}
+    .filter-btn:hover{border-color:var(--t-muted);color:var(--t-primary);}
+
+    /* TABLE */
+    .table-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;}
+    .tbl-head{display:grid;grid-template-columns:48px 1fr 160px 130px 140px 120px 80px;align-items:center;gap:12px;padding:11px 20px;background:var(--bg-elevated);border-bottom:1px solid var(--border);}
+    .tbl-row{display:grid;grid-template-columns:48px 1fr 160px 130px 140px 120px 80px;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--border-sub);transition:background 0.1s;cursor:pointer;}
+    .tbl-row:last-child{border-bottom:none;}
+    .tbl-row:hover{background:var(--bg-hover);}
+    .col-h{font-size:10px;font-weight:700;color:var(--t-muted);letter-spacing:1.2px;text-transform:uppercase;}
+    .row-num{font-size:12px;font-weight:600;color:var(--t-muted);text-align:center;}
+    .player-cell{display:flex;align-items:center;gap:12px;padding:14px 0;}
+    .player-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+    .av-green{background:var(--green-10);border:1.5px solid rgba(55,255,125,0.3);color:var(--green);}
+    .av-blue{background:var(--blue-10);border:1.5px solid rgba(71,184,255,0.3);color:var(--blue);}
+    .av-gold{background:var(--gold-10);border:1.5px solid rgba(255,181,71,0.3);color:var(--gold);}
+    .av-muted{background:var(--bg-elevated);border:1.5px solid var(--border);color:var(--t-muted);}
+    .pname{font-size:13px;font-weight:600;color:var(--t-primary);}
+    .pemail{font-size:11px;color:var(--t-muted);margin-top:1px;}
+    .screen-name{font-size:13px;font-weight:700;color:var(--t-secondary);letter-spacing:0.3px;}
+    .wallet-cell{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;}
+    .wallet-locked{color:var(--red);}
+    .wallet-unlocked{color:var(--green);}
+    .wallet-sub{font-size:10px;color:var(--t-muted);font-weight:400;margin-top:1px;}
+    .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.5px;}
+    .b-playing{background:var(--green-10);color:var(--green);border:1px solid rgba(55,255,125,0.2);}
+    .b-idle{background:var(--bg-elevated);color:var(--t-secondary);border:1px solid var(--border);}
+    .b-sitout{background:var(--gold-10);color:var(--gold);border:1px solid rgba(255,181,71,0.2);}
+    .live-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 1.6s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+    .tourn-tag{display:inline-flex;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;background:var(--blue-10);color:var(--blue);border:1px solid rgba(71,184,255,0.2);}
+    .tourn-none{color:var(--t-muted);font-size:12px;}
+    .row-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+    .action-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t-muted);transition:all 0.12s;}
+    .action-btn:hover{border-color:var(--t-muted);color:var(--t-primary);}
+    .action-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-10);}
+
+    /* PAGINATION */
+    .pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);}
+    .page-info{font-size:12px;color:var(--t-muted);}
+    .page-btns{display:flex;align-items:center;gap:4px;}
+    .page-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;color:var(--t-secondary);transition:all 0.12s;}
+    .page-btn:hover{border-color:var(--t-muted);color:var(--t-primary);}
+    .page-btn.active{background:var(--green);border-color:var(--green);color:var(--t-on-green);}
+    .page-btn.ellipsis{border:none;cursor:default;color:var(--t-muted);}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(3,10,6,0.85);display:none;align-items:center;justify-content:center;z-index:100;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-xl);padding:28px;width:480px;display:flex;flex-direction:column;gap:20px;box-shadow:0 24px 60px rgba(0,0,0,0.7);}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;}
+    .modal-title{font-size:17px;font-weight:700;color:var(--t-primary);}
+    .modal-close{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t-muted);font-size:16px;transition:all 0.12s;}
+    .modal-close:hover{border-color:var(--t-muted);color:var(--t-primary);}
+    .form-field{display:flex;flex-direction:column;gap:7px;}
+    .form-label{font-size:11px;font-weight:600;color:var(--t-secondary);letter-spacing:0.8px;text-transform:uppercase;}
+    .form-input{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 14px;color:var(--t-primary);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
+    .form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(55,255,125,0.08);}
+    .form-input::placeholder{color:var(--t-muted);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .modal-actions{display:flex;gap:10px;}
+    .btn-cancel{flex:1;height:40px;background:transparent;border:1px solid var(--border);border-radius:var(--r-md);font-family:var(--font);font-size:13px;font-weight:600;color:var(--t-secondary);cursor:pointer;transition:all 0.12s;}
+    .btn-cancel:hover{border-color:var(--t-muted);color:var(--t-primary);}
+    .btn-save{flex:1;height:40px;background:var(--green);border:none;border-radius:var(--r-md);font-family:var(--font);font-size:13px;font-weight:700;color:var(--t-on-green);cursor:pointer;transition:background 0.12s;}
+    .btn-save:hover{background:#4AFFA0;}
+    .avail-note{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);margin-top:2px;}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">P</div>
+      <div><div class="logo-name">Predicta</div><div class="logo-tag">Tournament</div></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Main</div>
+      <div class="nav-item" onclick="location.href='01_Admin_Dashboard.html'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+      </div>
+      <div class="nav-item" onclick="location.href='03_Tournament_Detail.html'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>Tournaments<span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item active">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Players
+      </div>
+      <div class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 014 0v2"/></svg>Tables
+      </div>
+      <div class="nav-label">Display</div>
+      <div class="nav-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Leaderboard
+      </div>
+      <div class="nav-label">System</div>
+      <div class="nav-item" onclick="location.href='14_System_Settings.html'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Settings
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">SA</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">Administrator</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Player Management</h1>
+        <p>247 registered · 192 active · 55 idle</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-ghost">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV
+        </button>
+        <button class="btn-primary" onclick="openModal()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Register Player
+        </button>
+        <button class="icon-btn"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Registered</div>
+          <div class="stat-val">247</div>
+          <div class="stat-sub"><span>+14 today</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Currently Playing</div>
+          <div class="stat-val" style="color:var(--green)">192</div>
+          <div class="stat-sub">Wallet locked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Idle / Available</div>
+          <div class="stat-val">55</div>
+          <div class="stat-sub">Wallet unlocked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sitting Out</div>
+          <div class="stat-val" style="color:var(--gold)">12</div>
+          <div class="stat-sub">Temporarily paused</div>
+        </div>
+      </div>
+
+      <!-- FILTER -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input class="search-input" type="text" placeholder="Search by name, screen name, or email…" />
+        </div>
+        <div class="filter-sep"></div>
+        <button class="filter-btn">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Status ▾
+        </button>
+        <button class="filter-btn">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
+          Tournament ▾
+        </button>
+        <button class="filter-btn">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter ▾
+        </button>
+      </div>
+
+      <!-- PLAYER TABLE -->
+      <div class="table-card">
+        <div class="tbl-head">
+          <div class="col-h" style="text-align:center">#</div>
+          <div class="col-h">Player</div>
+          <div class="col-h">Screen Name</div>
+          <div class="col-h">Wallet</div>
+          <div class="col-h">Tournament</div>
+          <div class="col-h">Status</div>
+          <div class="col-h" style="text-align:right">Actions</div>
+        </div>
+
+        <div class="tbl-row" onclick="openEditModal(1)">
+          <div class="row-num">1</div>
+          <div class="player-cell"><div class="player-av av-green">AM</div><div><div class="pname">Arjun Mehta</div><div class="pemail">arjun@email.com</div></div></div>
+          <div class="screen-name">ShadowAce</div>
+          <div><div class="wallet-cell wallet-locked">🔒 LOCKED</div><div class="wallet-sub">TBL-03</div></div>
+          <div><span class="tourn-tag">Grand Poker</span></div>
+          <div><span class="status-badge b-playing"><span class="live-dot"></span>PLAYING</span></div>
+          <div class="row-actions" onclick="event.stopPropagation()">
+            <button class="action-btn" title="Edit"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="action-btn danger" title="Delete"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">2</div>
+          <div class="player-cell"><div class="player-av av-blue">PS</div><div><div class="pname">Priya Sharma</div><div class="pemail">priya@email.com</div></div></div>
+          <div class="screen-name">NightFold</div>
+          <div><div class="wallet-cell wallet-locked">🔒 LOCKED</div><div class="wallet-sub">TBL-01</div></div>
+          <div><span class="tourn-tag">Grand Poker</span></div>
+          <div><span class="status-badge b-playing"><span class="live-dot"></span>PLAYING</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">3</div>
+          <div class="player-cell"><div class="player-av av-gold">RD</div><div><div class="pname">Rahul Das</div><div class="pemail">rahul@email.com</div></div></div>
+          <div class="screen-name">BluffKing</div>
+          <div><div class="wallet-cell wallet-unlocked">🔓 UNLOCKED</div><div class="wallet-sub" style="color:transparent">—</div></div>
+          <div><span class="tourn-none">—</span></div>
+          <div><span class="status-badge b-idle">○ IDLE</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">4</div>
+          <div class="player-cell"><div class="player-av av-muted">KT</div><div><div class="pname">Karan Tiwari</div><div class="pemail">karan@email.com</div></div></div>
+          <div class="screen-name">CardShark</div>
+          <div><div class="wallet-cell wallet-locked">🔒 LOCKED</div><div class="wallet-sub">TBL-01</div></div>
+          <div><span class="tourn-tag">Grand Poker</span></div>
+          <div><span class="status-badge b-playing"><span class="live-dot"></span>PLAYING</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">5</div>
+          <div class="player-cell"><div class="player-av av-blue">DP</div><div><div class="pname">Divya Pillai</div><div class="pemail">divya@email.com</div></div></div>
+          <div class="screen-name">RiverBoss</div>
+          <div><div class="wallet-cell wallet-locked">🔒 LOCKED</div><div class="wallet-sub">TBL-04</div></div>
+          <div><span class="tourn-tag">Grand Poker</span></div>
+          <div><span class="status-badge b-sitout">⏸ SIT OUT</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">6</div>
+          <div class="player-cell"><div class="player-av av-green">SK</div><div><div class="pname">Suresh Kumar</div><div class="pemail">suresh@email.com</div></div></div>
+          <div class="screen-name">AceDeep</div>
+          <div><div class="wallet-cell wallet-locked">🔒 LOCKED</div><div class="wallet-sub">TBL-02</div></div>
+          <div><span class="tourn-tag" style="background:var(--gold-10);color:var(--gold);border-color:rgba(255,181,71,0.2)">TP Classic</span></div>
+          <div><span class="status-badge b-playing"><span class="live-dot"></span>PLAYING</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">7</div>
+          <div class="player-cell"><div class="player-av av-muted">MR</div><div><div class="pname">Meera Rao</div><div class="pemail">meera@email.com</div></div></div>
+          <div class="screen-name">KingBluff</div>
+          <div><div class="wallet-cell wallet-unlocked">🔓 UNLOCKED</div><div class="wallet-sub" style="color:transparent">—</div></div>
+          <div><span class="tourn-none">—</span></div>
+          <div><span class="status-badge b-idle">○ IDLE</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="tbl-row">
+          <div class="row-num">8</div>
+          <div class="player-cell"><div class="player-av av-gold">VN</div><div><div class="pname">Vikram Nair</div><div class="pemail">vikram@email.com</div></div></div>
+          <div class="screen-name">PokerFace</div>
+          <div><div class="wallet-cell wallet-locked">🔒 LOCKED</div><div class="wallet-sub">TBL-01</div></div>
+          <div><span class="tourn-tag">Grand Poker</span></div>
+          <div><span class="status-badge b-playing"><span class="live-dot"></span>PLAYING</span></div>
+          <div class="row-actions"><button class="action-btn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn danger"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>
+        </div>
+
+        <div class="pagination">
+          <div class="page-info">Showing 1–8 of 247 players</div>
+          <div class="page-btns">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn ellipsis">…</button>
+            <button class="page-btn">32</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER / EDIT MODAL -->
+<div class="modal-overlay" id="mo">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="mTitle">Register New Player</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">First Name *</label><input class="form-input" type="text" placeholder="Arjun" /></div>
+      <div class="form-field"><label class="form-label">Last Name *</label><input class="form-input" type="text" placeholder="Mehta" /></div>
+    </div>
+    <div class="form-field"><label class="form-label">Email Address *</label><input class="form-input" type="email" placeholder="arjun@email.com" /></div>
+    <div class="form-field"><label class="form-label">Phone (optional)</label><input class="form-input" type="tel" placeholder="+1 …" /></div>
+    <div class="form-field">
+      <label class="form-label">Screen Name *</label>
+      <input class="form-input" type="text" placeholder="Choose a unique screen name" id="snInput" oninput="checkName()" />
+      <div class="avail-note" id="nameAvail" style="display:none">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Available
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save">Register & Print Badge</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal(){ document.getElementById('mTitle').textContent='Register New Player'; document.getElementById('mo').classList.add('open'); }
+  function openEditModal(id){ document.getElementById('mTitle').textContent='Edit Player'; document.getElementById('mo').classList.add('open'); }
+  function closeModal(){ document.getElementById('mo').classList.remove('open'); }
+  function checkName(){
+    const v = document.getElementById('snInput').value;
+    const el = document.getElementById('nameAvail');
+    el.style.display = v.length >= 3 ? '' : 'none';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>Predicta Tournament — Leaderboard Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --bg-base:      #030A06;
+      --bg-card:      #0A1A0F;
+      --bg-elevated:  #0F2218;
+      --bg-hover:     #142B1E;
+      --border:       #1A3A26;
+      --border-sub:   #0D1F14;
+
+      --green:        #37FF7D;
+      --green-10:     rgba(55,255,125,0.10);
+      --green-20:     rgba(55,255,125,0.20);
+      --green-glow:   0 0 20px rgba(55,255,125,0.18);
+
+      --blue:         #47B8FF;
+      --blue-10:      rgba(71,184,255,0.10);
+      --gold:         #FFB547;
+      --gold-10:      rgba(255,181,71,0.10);
+      --red:          #FF4747;
+      --red-10:       rgba(255,71,71,0.10);
+
+      --t-primary:    #FFFFFF;
+      --t-secondary:  #8BA89A;
+      --t-muted:      #4A6B57;
+      --t-on-green:   #030A06;
+
+      --font: 'VoldaSans', 'Rajdhani', 'Exo 2', system-ui, sans-serif;
+
+      --r-sm:  6px;
+      --r-md:  8px;
+      --r-lg:  12px;
+      --r-xl:  16px;
+    }
+
+    /* ─────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1440px;
+      min-height: 900px;
+      background: var(--bg-base);
+      color: var(--t-primary);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─────────────────────────────────────────
+       LAYOUT SHELL
+    ───────────────────────────────────────── */
+    .app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ─────────────────────────────────────────
+       SIDEBAR
+    ───────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--green);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700;
+      color: var(--t-on-green);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .logo-copy { display: flex; flex-direction: column; gap: 1px; }
+    .logo-name {
+      font-size: 15px; font-weight: 700;
+      color: var(--t-primary); letter-spacing: 0.4px;
+    }
+    .logo-tag {
+      font-size: 9px; font-weight: 600;
+      color: var(--t-muted); letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    /* Nav */
+    .nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav-section { margin-bottom: 4px; }
+
+    .nav-label {
+      padding: 10px 20px 4px;
+      font-size: 9px; font-weight: 700;
+      color: var(--t-muted); letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 20px;
+      font-size: 13px; font-weight: 500;
+      color: var(--t-secondary);
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      position: relative;
+      user-select: none;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: var(--bg-hover); color: var(--t-primary); }
+
+    .nav-item.active {
+      background: var(--green-10);
+      color: var(--green);
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--green);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item svg { flex-shrink: 0; opacity: 0.65; }
+    .nav-item.active svg { opacity: 1; }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 32px; height: 32px;
+      background: var(--green-10);
+      border: 1.5px solid var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+    .user-copy { flex: 1; min-width: 0; }
+    .user-name { font-size: 12px; font-weight: 600; color: var(--t-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 9px; font-weight: 600; color: var(--t-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .more-btn {
+      width: 26px; height: 26px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--t-muted);
+      transition: border-color 0.12s, color 0.12s;
+      flex-shrink: 0;
+    }
+    .more-btn:hover { border-color: var(--t-muted); color: var(--t-primary); }
+
+    /* ─────────────────────────────────────────
+       MAIN AREA
+    ───────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 0; }
+
+    /* Topbar */
+    .topbar {
+      height: 60px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 16px;
+      flex-shrink: 0;
+    }
+    .breadcrumb {
+      flex: 1;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500;
+    }
+    .breadcrumb-link { color: var(--t-muted); cursor: pointer; transition: color 0.12s; text-decoration: none; }
+    .breadcrumb-link:hover { color: var(--t-secondary); }
+    .breadcrumb-sep { color: var(--t-muted); }
+    .breadcrumb-current { color: var(--t-primary); font-weight: 600; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--t-secondary);
+      transition: border-color 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { border-color: var(--t-muted); color: var(--t-primary); }
+
+    .topbar-select {
+      height: 36px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      color: var(--t-primary);
+      font-family: var(--font);
+      font-size: 12px; font-weight: 600;
+      padding: 0 12px;
+      cursor: pointer;
+      outline: none;
+    }
+    .topbar-select:focus { border-color: var(--green); }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 0 16px; height: 36px;
+      background: var(--green); color: var(--t-on-green);
+      border: none; border-radius: var(--r-md);
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.5px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .btn-primary:hover { background: #4AFFA0; }
+
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 0 14px; height: 36px;
+      background: transparent; color: var(--t-secondary);
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.3px; cursor: pointer;
+      transition: border-color 0.12s, color 0.12s, background 0.12s;
+    }
+    .btn-outline:hover { border-color: var(--t-muted); color: var(--t-primary); background: var(--bg-hover); }
+
+    /* ─────────────────────────────────────────
+       CONTENT SCROLL AREA
+    ───────────────────────────────────────── */
+    .content {
+      flex: 1; overflow-y: auto;
+      padding: 24px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ─────────────────────────────────────────
+       CARDS
+    ───────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+    }
+
+    /* ─────────────────────────────────────────
+       FILTER BAR
+    ───────────────────────────────────────── */
+    .filter-bar {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      height: 38px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      color: var(--t-primary);
+      font-family: var(--font);
+      font-size: 13px; font-weight: 600;
+      padding: 0 12px;
+      cursor: pointer; outline: none;
+      min-width: 220px;
+    }
+    .filter-select:focus { border-color: var(--green); }
+
+    .search-input-wrap { position: relative; flex: 1; max-width: 280px; }
+    .search-icon {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--t-muted);
+    }
+    .search-input {
+      width: 100%; height: 38px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      color: var(--t-primary);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 0 12px 0 34px;
+      outline: none;
+    }
+    .search-input::placeholder { color: var(--t-muted); }
+    .search-input:focus { border-color: var(--green); }
+
+    .filter-btns { display: flex; gap: 4px; margin-left: auto; }
+    .filter-btn {
+      height: 34px; padding: 0 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--t-secondary);
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.3px; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .filter-btn:hover { border-color: var(--t-muted); color: var(--t-primary); background: var(--bg-hover); }
+    .filter-btn.active {
+      background: var(--green-10);
+      border-color: rgba(55,255,125,0.3);
+      color: var(--green);
+    }
+
+    /* ─────────────────────────────────────────
+       PODIUM
+    ───────────────────────────────────────── */
+    .podium-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      color: var(--t-muted); text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .podium-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .podium-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 22px 20px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.15s;
+    }
+    .podium-card:hover { transform: translateY(-2px); }
+
+    .podium-card.rank-1 {
+      border-color: rgba(255,181,71,0.4);
+      background: linear-gradient(160deg, #0F2218 0%, rgba(255,181,71,0.06) 100%);
+      box-shadow: 0 0 32px rgba(255,181,71,0.12), inset 0 1px 0 rgba(255,181,71,0.1);
+    }
+    .podium-card.rank-2 {
+      border-color: rgba(192,192,192,0.25);
+      background: linear-gradient(160deg, #0F2218 0%, rgba(192,192,192,0.04) 100%);
+    }
+    .podium-card.rank-3 {
+      border-color: rgba(205,127,50,0.25);
+      background: linear-gradient(160deg, #0F2218 0%, rgba(205,127,50,0.04) 100%);
+    }
+
+    .medal {
+      font-size: 32px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    }
+
+    .podium-rank-num {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .rank-1 .podium-rank-num { color: #FFB547; }
+    .rank-2 .podium-rank-num { color: #C0C0C0; }
+    .rank-3 .podium-rank-num { color: #CD7F32; }
+
+    .podium-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700;
+      color: var(--t-on-green);
+      margin: 4px 0;
+    }
+    .rank-1 .podium-avatar { background: linear-gradient(135deg, #FFB547, #e69500); box-shadow: 0 0 18px rgba(255,181,71,0.4); }
+    .rank-2 .podium-avatar { background: linear-gradient(135deg, #C0C0C0, #888); }
+    .rank-3 .podium-avatar { background: linear-gradient(135deg, #CD7F32, #8B5A1F); }
+
+    .podium-name {
+      font-size: 16px; font-weight: 700;
+      color: var(--t-primary); letter-spacing: 0.3px;
+    }
+    .podium-pts {
+      font-size: 24px; font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .rank-1 .podium-pts { color: #FFB547; }
+    .rank-2 .podium-pts { color: #C0C0C0; }
+    .rank-3 .podium-pts { color: #CD7F32; }
+
+    .podium-pts-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 1px;
+      color: var(--t-muted); text-transform: uppercase;
+      margin-top: -4px;
+    }
+
+    .podium-stats {
+      display: flex; gap: 16px;
+      margin-top: 6px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-sub);
+      width: 100%;
+      justify-content: center;
+    }
+    .podium-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .podium-stat-val { font-size: 14px; font-weight: 700; color: var(--t-primary); }
+    .podium-stat-key { font-size: 9px; font-weight: 600; color: var(--t-muted); letter-spacing: 1.2px; text-transform: uppercase; }
+
+    .podium-table-tag {
+      position: absolute; top: 12px; right: 14px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+      color: var(--t-muted);
+      background: var(--border-sub);
+      padding: 3px 8px; border-radius: 20px;
+    }
+
+    /* ─────────────────────────────────────────
+       LEADERBOARD TABLE
+    ───────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: 13px; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--t-muted); text-transform: uppercase;
+    }
+    .section-meta { font-size: 11px; color: var(--t-muted); }
+
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-table thead th {
+      padding: 10px 14px;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--t-muted); text-transform: uppercase;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .lb-table thead th:first-child { width: 52px; text-align: center; }
+    .lb-table thead th.align-right { text-align: right; }
+
+    .lb-table tbody tr {
+      border-bottom: 1px solid var(--border-sub);
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    .lb-table tbody tr:hover { background: var(--bg-hover); }
+
+    .lb-table td {
+      padding: 13px 14px;
+      font-size: 13px;
+      color: var(--t-secondary);
+    }
+
+    .rank-cell {
+      text-align: center;
+      font-size: 13px; font-weight: 700;
+      color: var(--t-muted);
+      width: 52px;
+    }
+    .rank-cell.top3 { color: var(--t-primary); }
+
+    .player-cell { display: flex; align-items: center; gap: 10px; }
+    .player-avatar-sm {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--green-10);
+      border: 1.5px solid rgba(55,255,125,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+    .player-name { font-size: 13px; font-weight: 700; color: var(--t-primary); }
+    .player-realname { font-size: 11px; color: var(--t-muted); }
+
+    .table-tag {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      color: var(--t-secondary); letter-spacing: 0.5px;
+    }
+
+    .pts-cell { text-align: right; min-width: 160px; }
+    .pts-bar-wrap { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+    .pts-val { font-size: 13px; font-weight: 700; color: var(--t-primary); white-space: nowrap; min-width: 52px; text-align: right; }
+    .pts-bar-track {
+      width: 90px; height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .pts-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green) 0%, rgba(55,255,125,0.6) 100%);
+      border-radius: 3px;
+    }
+
+    .change-up { color: var(--green); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .change-down { color: var(--red); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .change-none { color: var(--t-muted); font-size: 12px; font-weight: 600; }
+
+    .align-right { text-align: right; }
+
+    /* ─────────────────────────────────────────
+       PAGINATION
+    ───────────────────────────────────────── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 4px;
+    }
+    .pagination-info { font-size: 12px; color: var(--t-muted); }
+    .pagination-btns { display: flex; gap: 4px; }
+    .page-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--t-secondary);
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .page-btn:hover { border-color: var(--t-muted); color: var(--t-primary); background: var(--bg-hover); }
+    .page-btn.active {
+      background: var(--green-10);
+      border-color: rgba(55,255,125,0.3);
+      color: var(--green);
+    }
+    .page-btn-nav { width: auto; padding: 0 12px; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">P</div>
+      <div class="logo-copy">
+        <div class="logo-name">Predicta</div>
+        <div class="logo-tag">Tournament</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <a class="nav-item" href="01_Admin_Dashboard.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a class="nav-item" href="03_Tournament_Detail.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Tournaments
+        </a>
+        <a class="nav-item" href="04_Player_Management.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Players
+        </a>
+        <a class="nav-item" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Tables
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Display</div>
+        <a class="nav-item active" href="05_Leaderboard_Analytics.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Leaderboard
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <a class="nav-item" href="14_System_Settings.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">SA</div>
+      <div class="user-copy">
+        <div class="user-name">Super Admin</div>
+        <div class="user-role">Administrator</div>
+      </div>
+      <div class="more-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a class="breadcrumb-link" href="01_Admin_Dashboard.html">Dashboard</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Leaderboard Analytics</span>
+      </div>
+      <div class="topbar-actions">
+        <select class="topbar-select">
+          <option>Grand Poker Championship</option>
+          <option>Monthly Showdown #4</option>
+          <option>Qualifier Round 2</option>
+        </select>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button class="icon-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- 1. FILTER BAR -->
+      <div class="card">
+        <div class="filter-bar">
+          <select class="filter-select">
+            <option>Grand Poker Championship</option>
+            <option>Monthly Showdown #4</option>
+            <option>Qualifier Round 2</option>
+          </select>
+          <div class="search-input-wrap">
+            <span class="search-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" class="search-input" placeholder="Search players…" />
+          </div>
+          <div class="filter-btns">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Top 10</button>
+            <button class="filter-btn">Top 50</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. TOP 3 PODIUM -->
+      <div>
+        <div class="podium-label">Top Performers</div>
+        <div class="podium-row">
+
+          <!-- Rank 1 -->
+          <div class="podium-card rank-1">
+            <span class="podium-table-tag">TBL-03</span>
+            <div class="medal">🥇</div>
+            <div class="podium-rank-num">1st Place</div>
+            <div class="podium-avatar">SA</div>
+            <div class="podium-name">ShadowAce</div>
+            <div class="podium-pts">14,820</div>
+            <div class="podium-pts-label">Points</div>
+            <div class="podium-stats">
+              <div class="podium-stat">
+                <div class="podium-stat-val">88</div>
+                <div class="podium-stat-key">Hands</div>
+              </div>
+              <div class="podium-stat">
+                <div class="podium-stat-val">32</div>
+                <div class="podium-stat-key">Wins</div>
+              </div>
+              <div class="podium-stat">
+                <div class="podium-stat-val">36%</div>
+                <div class="podium-stat-key">Win Rate</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rank 2 -->
+          <div class="podium-card rank-2">
+            <span class="podium-table-tag">TBL-01</span>
+            <div class="medal">🥈</div>
+            <div class="podium-rank-num">2nd Place</div>
+            <div class="podium-avatar">NF</div>
+            <div class="podium-name">NightFold</div>
+            <div class="podium-pts">13,445</div>
+            <div class="podium-pts-label">Points</div>
+            <div class="podium-stats">
+              <div class="podium-stat">
+                <div class="podium-stat-val">72</div>
+                <div class="podium-stat-key">Hands</div>
+              </div>
+              <div class="podium-stat">
+                <div class="podium-stat-val">24</div>
+                <div class="podium-stat-key">Wins</div>
+              </div>
+              <div class="podium-stat">
+                <div class="podium-stat-val">33%</div>
+                <div class="podium-stat-key">Win Rate</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rank 3 -->
+          <div class="podium-card rank-3">
+            <span class="podium-table-tag">TBL-02</span>
+            <div class="medal">🥉</div>
+            <div class="podium-rank-num">3rd Place</div>
+            <div class="podium-avatar">BK</div>
+            <div class="podium-name">BluffKing</div>
+            <div class="podium-pts">12,100</div>
+            <div class="podium-pts-label">Points</div>
+            <div class="podium-stats">
+              <div class="podium-stat">
+                <div class="podium-stat-val">91</div>
+                <div class="podium-stat-key">Hands</div>
+              </div>
+              <div class="podium-stat">
+                <div class="podium-stat-val">28</div>
+                <div class="podium-stat-key">Wins</div>
+              </div>
+              <div class="podium-stat">
+                <div class="podium-stat-val">31%</div>
+                <div class="podium-stat-key">Win Rate</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3. FULL LEADERBOARD TABLE -->
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 18px 20px 0;">
+          <div class="section-header">
+            <span class="section-title">Full Leaderboard</span>
+            <span class="section-meta">Grand Poker Championship · Live</span>
+          </div>
+        </div>
+
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th style="text-align:center;">Rank</th>
+              <th>Player</th>
+              <th>Table</th>
+              <th class="align-right">Hands</th>
+              <th class="align-right">Wins</th>
+              <th style="text-align:right; padding-right: 20px;">Points</th>
+              <th style="text-align:center;">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1 -->
+            <tr>
+              <td class="rank-cell top3" style="font-size:15px;">1</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm" style="background: rgba(255,181,71,0.12); border-color: rgba(255,181,71,0.4); color: #FFB547;">SA</div>
+                  <div>
+                    <div class="player-name">ShadowAce</div>
+                    <div class="player-realname">Arjun M.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-03</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">88</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">32</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:100%;"></div></div>
+                  <span class="pts-val">14,820</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-none">—</span></td>
+            </tr>
+            <!-- Row 2 -->
+            <tr>
+              <td class="rank-cell top3">2</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm" style="background: rgba(192,192,192,0.08); border-color: rgba(192,192,192,0.3); color: #C0C0C0;">NF</div>
+                  <div>
+                    <div class="player-name">NightFold</div>
+                    <div class="player-realname">Priya S.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-01</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">72</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">24</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:90.7%;"></div></div>
+                  <span class="pts-val">13,445</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-up">▲ +1</span></td>
+            </tr>
+            <!-- Row 3 -->
+            <tr>
+              <td class="rank-cell top3">3</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm" style="background: rgba(205,127,50,0.1); border-color: rgba(205,127,50,0.35); color: #CD7F32;">BK</div>
+                  <div>
+                    <div class="player-name">BluffKing</div>
+                    <div class="player-realname">Rahul D.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-02</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">91</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">28</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:81.6%;"></div></div>
+                  <span class="pts-val">12,100</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-down">▼ -1</span></td>
+            </tr>
+            <!-- Row 4 -->
+            <tr>
+              <td class="rank-cell">4</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">CS</div>
+                  <div>
+                    <div class="player-name">CardShark</div>
+                    <div class="player-realname">Karan T.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-01</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">65</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">19</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:79.5%;"></div></div>
+                  <span class="pts-val">11,780</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-none">—</span></td>
+            </tr>
+            <!-- Row 5 -->
+            <tr>
+              <td class="rank-cell">5</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">RB</div>
+                  <div>
+                    <div class="player-name">RiverBoss</div>
+                    <div class="player-realname">Divya P.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-04</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">58</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">17</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:74.2%;"></div></div>
+                  <span class="pts-val">10,990</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-up">▲ +2</span></td>
+            </tr>
+            <!-- Row 6 -->
+            <tr>
+              <td class="rank-cell">6</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">AD</div>
+                  <div>
+                    <div class="player-name">AceDeep</div>
+                    <div class="player-realname">Suresh K.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-02</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">77</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">23</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:70.5%;"></div></div>
+                  <span class="pts-val">10,450</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-down">▼ -1</span></td>
+            </tr>
+            <!-- Row 7 -->
+            <tr>
+              <td class="rank-cell">7</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">KB</div>
+                  <div>
+                    <div class="player-name">KingBluff</div>
+                    <div class="player-realname">Meera R.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-03</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">69</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">20</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:66.1%;"></div></div>
+                  <span class="pts-val">9,800</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-none">—</span></td>
+            </tr>
+            <!-- Row 8 -->
+            <tr>
+              <td class="rank-cell">8</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">PF</div>
+                  <div>
+                    <div class="player-name">PokerFace</div>
+                    <div class="player-realname">Vikram N.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-01</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">54</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">15</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:61.4%;"></div></div>
+                  <span class="pts-val">9,100</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-up">▲ +3</span></td>
+            </tr>
+            <!-- Row 9 -->
+            <tr>
+              <td class="rank-cell">9</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">DH</div>
+                  <div>
+                    <div class="player-name">DarkHorse</div>
+                    <div class="player-realname">Anita S.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-05</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">82</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">18</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:59.0%;"></div></div>
+                  <span class="pts-val">8,750</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-down">▼ -2</span></td>
+            </tr>
+            <!-- Row 10 -->
+            <tr>
+              <td class="rank-cell">10</td>
+              <td>
+                <div class="player-cell">
+                  <div class="player-avatar-sm">RF</div>
+                  <div>
+                    <div class="player-name">RoyalFlush</div>
+                    <div class="player-realname">Raj P.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="table-tag">TBL-06</span></td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">61</td>
+              <td class="align-right" style="color: var(--t-primary); font-weight: 600;">14</td>
+              <td class="pts-cell">
+                <div class="pts-bar-wrap">
+                  <div class="pts-bar-track"><div class="pts-bar-fill" style="width:55.3%;"></div></div>
+                  <span class="pts-val">8,200</span>
+                </div>
+              </td>
+              <td style="text-align:center;"><span class="change-none">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div style="padding: 14px 20px; border-top: 1px solid var(--border-sub);">
+          <div class="pagination">
+            <span class="pagination-info">Showing 1–10 of 82 players</span>
+            <div class="pagination-btns">
+              <button class="page-btn page-btn-nav" disabled style="opacity:0.4; cursor:not-allowed;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Prev
+              </button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <span class="page-btn" style="border:none; cursor:default; color: var(--t-muted);">…</span>
+              <button class="page-btn">9</button>
+              <button class="page-btn page-btn-nav">
+                Next
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+  // Filter button active state
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Page button active state
+  document.querySelectorAll('.page-btn:not(.page-btn-nav)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.page-btn:not(.page-btn-nav)').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <title>Predicta Tournament — Seat Actions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base: #030A06;
+      --bg-card: #0A1A0F;
+      --bg-elevated: #0F2218;
+      --bg-hover: #142B1E;
+      --border: #1A3A26;
+      --border-sub: #0D1F14;
+      --green: #37FF7D;
+      --green-10: rgba(55,255,125,0.10);
+      --green-glow: 0 0 20px rgba(55,255,125,0.18);
+      --blue: #47B8FF;
+      --blue-10: rgba(71,184,255,0.10);
+      --gold: #FFB547;
+      --gold-10: rgba(255,181,71,0.10);
+      --red: #FF4747;
+      --red-10: rgba(255,71,71,0.10);
+      --t-primary: #FFFFFF;
+      --t-secondary: #8BA89A;
+      --t-muted: #4A6B57;
+      --t-on-green: #030A06;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1200px;
+      min-height: 1920px;
+      background: var(--bg-base);
+      font-family: 'VoldaSans', 'Rajdhani', 'Exo 2', system-ui, sans-serif;
+      color: var(--t-primary);
+      overflow-x: hidden;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      width: 100%;
+      height: 70px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .btn-ghost-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .btn-ghost-nav:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+    }
+
+    .table-tag {
+      display: inline-flex;
+      align-items: center;
+      height: 34px;
+      padding: 0 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--t-secondary);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── PLAYER HEADER CARD ── */
+    .player-header {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin: 28px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .avatar-xl {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--green-10);
+      border: 2px solid var(--green);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+      box-shadow: 0 0 16px rgba(55,255,125,0.15);
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-seat-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--t-primary);
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+
+    .player-sub {
+      font-size: 13px;
+      color: var(--t-muted);
+      font-weight: 500;
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .player-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--t-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .stat-chips {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .stat-points {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--t-primary);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .badge-playing {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--green-10);
+      border: 1px solid rgba(55,255,125,0.3);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .badge-playing .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse-dot 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ── ACTION SELECTOR GRID ── */
+    .action-grid {
+      margin: 0 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .action-card {
+      height: 100px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.1s;
+      user-select: none;
+    }
+
+    .action-card:hover { transform: translateY(-2px); }
+    .action-card:active { transform: translateY(0); }
+
+    .action-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .action-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--t-primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .action-sub {
+      font-size: 11px;
+      color: var(--t-muted);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    /* Action card selected states */
+    .action-card[data-action="rebuy"].selected {
+      border-color: var(--green);
+      background: var(--green-10);
+      box-shadow: var(--green-glow);
+    }
+
+    .action-card[data-action="rebuy"].selected .action-title { color: var(--green); }
+
+    .action-card[data-action="sitout"].selected {
+      border-color: var(--gold);
+      background: var(--gold-10);
+      box-shadow: 0 0 20px rgba(255,181,71,0.15);
+    }
+
+    .action-card[data-action="sitout"].selected .action-title { color: var(--gold); }
+
+    .action-card[data-action="detach"].selected {
+      border-color: var(--t-muted);
+      background: var(--bg-elevated);
+    }
+
+    .action-card[data-action="detach"].selected .action-title { color: var(--t-secondary); }
+
+    .action-card[data-action="surrender"].selected {
+      border-color: var(--red);
+      background: var(--red-10);
+      box-shadow: 0 0 20px rgba(255,71,71,0.15);
+    }
+
+    .action-card[data-action="surrender"].selected .action-title { color: var(--red); }
+
+    /* ── PANEL AREA ── */
+    .panel-area {
+      margin: 20px 28px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 110px;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.visible {
+      display: block;
+      animation: fadeIn 0.28s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Panel cards */
+    .panel-card {
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-card-green {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    .panel-card-gold {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,181,71,0.35);
+    }
+
+    .panel-card-muted {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    .panel-card-red {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,71,71,0.35);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--t-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--t-primary);
+      line-height: 1.3;
+    }
+
+    .panel-body {
+      font-size: 14px;
+      color: var(--t-secondary);
+      font-weight: 500;
+      line-height: 1.65;
+    }
+
+    .warning-note-gold {
+      background: var(--gold-10);
+      border: 1px solid rgba(255,181,71,0.25);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+    }
+
+    .warning-note-red {
+      background: var(--red-10);
+      border: 1px solid rgba(255,71,71,0.25);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--red);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── BUYIN INPUT ── */
+    .buyin-input-wrap {
+      position: relative;
+    }
+
+    .buyin-prefix {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      pointer-events: none;
+    }
+
+    .buyin-input {
+      width: 100%;
+      height: 72px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 18px 0 46px;
+      font-family: inherit;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--t-primary);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .buyin-input:focus {
+      border-color: var(--green);
+      box-shadow: var(--green-glow);
+    }
+
+    .quick-select-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .quick-btn {
+      flex: 1;
+      height: 56px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .quick-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+    }
+
+    .quick-btn.active {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+      box-shadow: var(--green-glow);
+    }
+
+    /* ── CONFIRM BUTTONS ── */
+    .btn-confirm-green {
+      width: 100%;
+      height: 56px;
+      background: var(--green);
+      border: none;
+      border-radius: 10px;
+      color: var(--t-on-green);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      box-shadow: var(--green-glow);
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-confirm-green:hover { opacity: 0.88; }
+
+    .btn-confirm-gold {
+      width: 100%;
+      height: 56px;
+      background: var(--gold-10);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      color: var(--gold);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-confirm-gold:hover { background: rgba(255,181,71,0.18); }
+
+    .btn-confirm-muted {
+      width: 100%;
+      height: 56px;
+      background: transparent;
+      border: 1px solid var(--t-muted);
+      border-radius: 10px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-confirm-muted:hover {
+      border-color: var(--t-secondary);
+      color: var(--t-primary);
+    }
+
+    .btn-confirm-red {
+      width: 100%;
+      height: 56px;
+      background: var(--red);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-confirm-red:hover { opacity: 0.88; }
+
+    /* ── CHIPS DISPLAY ── */
+    .chips-display {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chips-label {
+      font-size: 13px;
+      color: var(--t-muted);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .chips-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── PROCESSING STATE ── */
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(3,10,6,0.85);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 24px;
+      backdrop-filter: blur(4px);
+    }
+
+    .processing-overlay.visible {
+      display: flex;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .processing-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      min-width: 360px;
+    }
+
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--t-primary);
+      letter-spacing: 0.02em;
+    }
+
+    .processing-sub {
+      font-size: 13px;
+      color: var(--t-muted);
+      font-weight: 500;
+    }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1200px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      z-index: 200;
+    }
+
+    .btn-back-full {
+      width: 100%;
+      height: 48px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.02em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .btn-back-full:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+    }
+
+    /* ── SECTION HEADER WITHIN ACTION GRID ── */
+    .section-header {
+      margin: 24px 28px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--t-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <a href="07_Table_Seating_View.html" class="btn-ghost-nav">
+        ← Back to Table
+      </a>
+    </div>
+    <div>
+      <span class="table-tag">TBL-03</span>
+    </div>
+  </div>
+
+  <!-- PLAYER HEADER CARD -->
+  <div class="player-header">
+    <div class="avatar-xl">SA</div>
+    <div class="player-info">
+      <div class="player-seat-name">Seat 1 — ShadowAce</div>
+      <div class="player-sub">Arjun Mehta · Grand Poker Championship</div>
+    </div>
+    <div class="player-stats">
+      <div class="stat-block">
+        <span class="stat-label">Chips</span>
+        <span class="stat-chips">$2,400</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-label">Points</span>
+        <span class="stat-points">14,820</span>
+      </div>
+    </div>
+    <div>
+      <div class="badge-playing">
+        <span class="dot"></span> PLAYING
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION SELECTOR -->
+  <div class="section-header">Select Action</div>
+  <div class="action-grid">
+
+    <div class="action-card selected" data-action="rebuy" onclick="selectAction('rebuy')">
+      <span class="action-icon">➕</span>
+      <span class="action-title">Rebuy</span>
+      <span class="action-sub">Add chips to stack</span>
+    </div>
+
+    <div class="action-card" data-action="sitout" onclick="selectAction('sitout')">
+      <span class="action-icon">⏸</span>
+      <span class="action-title">Sit Out</span>
+      <span class="action-sub">Temporarily pause</span>
+    </div>
+
+    <div class="action-card" data-action="detach" onclick="selectAction('detach')">
+      <span class="action-icon">🔓</span>
+      <span class="action-title">Detach</span>
+      <span class="action-sub">Leave tournament</span>
+    </div>
+
+    <div class="action-card" data-action="surrender" onclick="selectAction('surrender')">
+      <span class="action-icon">💰</span>
+      <span class="action-title">Surrender</span>
+      <span class="action-sub">Cash out &amp; leave</span>
+    </div>
+
+  </div>
+
+  <!-- PANEL AREA -->
+  <div class="panel-area">
+
+    <!-- REBUY PANEL -->
+    <div class="panel visible" id="rebuyPanel">
+      <div class="panel-card panel-card-green">
+        <div class="section-label">Rebuy Amount</div>
+
+        <div class="buyin-input-wrap">
+          <span class="buyin-prefix">$</span>
+          <input type="text" class="buyin-input" value="1,000" id="rebuyInput" />
+        </div>
+
+        <div class="quick-select-row">
+          <button class="quick-btn" onclick="setRebuyAmount(500, this)">$500</button>
+          <button class="quick-btn active" onclick="setRebuyAmount(1000, this)">$1,000</button>
+          <button class="quick-btn" onclick="setRebuyAmount(2000, this)">$2,000</button>
+          <button class="quick-btn" onclick="setRebuyAmount(5000, this)">$5,000</button>
+        </div>
+
+        <button class="btn-confirm-green" onclick="handleAction('rebuy', 'Rebuy confirmed. Chips added to stack.')">
+          ✓ Confirm Rebuy
+        </button>
+      </div>
+    </div>
+
+    <!-- SIT OUT PANEL -->
+    <div class="panel" id="sitoutPanel">
+      <div class="panel-card panel-card-gold">
+        <div class="panel-title">Mark Player as Sitting Out</div>
+        <div class="panel-body">
+          ShadowAce will be paused. They keep their chips and tournament points. They can resume at any time.
+        </div>
+        <div class="warning-note-gold">
+          ⚠️ The seat will remain reserved for this player.
+        </div>
+        <button class="btn-confirm-gold" onclick="handleAction('sitout', 'Player marked as sitting out.')">
+          ⏸ Confirm Sit Out
+        </button>
+      </div>
+    </div>
+
+    <!-- DETACH PANEL -->
+    <div class="panel" id="detachPanel">
+      <div class="panel-card panel-card-muted">
+        <div class="panel-title">Detach Player from Tournament</div>
+        <div class="panel-body">
+          ShadowAce will leave the tournament. Their wallet will be <strong style="color:var(--green)">UNLOCKED</strong> and they can join another table or tournament.
+        </div>
+        <div class="warning-note-red">
+          ⚠️ Detaching will end tournament scoring. Existing points are preserved.
+        </div>
+        <button class="btn-confirm-muted" onclick="handleAction('detach', 'Player detached from tournament.')">
+          Confirm Detach
+        </button>
+      </div>
+    </div>
+
+    <!-- SURRENDER PANEL -->
+    <div class="panel" id="surrenderPanel">
+      <div class="panel-card panel-card-red">
+        <div class="panel-title">Surrender &amp; Cash Out</div>
+        <div class="panel-body">
+          ShadowAce will cash out with their remaining chips.
+        </div>
+
+        <div class="chips-display">
+          <span class="chips-label">Final Chip Count</span>
+          <span class="chips-value">$2,400</span>
+        </div>
+
+        <div class="warning-note-red">
+          ⚠️ This action cannot be undone. Player will be removed from the table.
+        </div>
+        <button class="btn-confirm-red" onclick="handleAction('surrender', 'Player cashed out and removed.')">
+          💰 Confirm Cash Out
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <a href="07_Table_Seating_View.html" class="btn-back-full">
+      ← Back to Table View
+    </a>
+  </div>
+
+  <!-- PROCESSING OVERLAY -->
+  <div class="processing-overlay" id="processingOverlay">
+    <div class="processing-box">
+      <div class="spinner"></div>
+      <div class="processing-text">Processing…</div>
+      <div class="processing-sub" id="processingSubText">Please wait.</div>
+    </div>
+  </div>
+
+  <script>
+    // ── ACTION SELECTOR ──
+    function selectAction(action) {
+      // Deselect all cards
+      document.querySelectorAll('.action-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      // Select clicked card
+      document.querySelector('.action-card[data-action="' + action + '"]').classList.add('selected');
+
+      // Hide all panels
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+
+      // Show target panel
+      const panelMap = {
+        rebuy: 'rebuyPanel',
+        sitout: 'sitoutPanel',
+        detach: 'detachPanel',
+        surrender: 'surrenderPanel'
+      };
+
+      const targetPanel = document.getElementById(panelMap[action]);
+      if (targetPanel) {
+        targetPanel.classList.add('visible');
+      }
+    }
+
+    // ── QUICK AMOUNT BUTTONS (REBUY) ──
+    function setRebuyAmount(amount, btn) {
+      document.querySelectorAll('#rebuyPanel .quick-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('rebuyInput').value = amount.toLocaleString();
+    }
+
+    // ── CONFIRM ACTION ──
+    function handleAction(action, message) {
+      const overlay = document.getElementById('processingOverlay');
+      const subText = document.getElementById('processingSubText');
+
+      subText.textContent = message;
+      overlay.classList.add('visible');
+
+      setTimeout(() => {
+        window.location.href = '07_Table_Seating_View.html';
+      }, 1500);
+    }
+  </script>
+
+</body>
+</html>

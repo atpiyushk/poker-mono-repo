@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <title>Predicta Tournament — Player Onboarding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base: #030A06;
+      --bg-card: #0A1A0F;
+      --bg-elevated: #0F2218;
+      --bg-hover: #142B1E;
+      --border: #1A3A26;
+      --border-sub: #0D1F14;
+      --green: #37FF7D;
+      --green-10: rgba(55,255,125,0.10);
+      --green-glow: 0 0 20px rgba(55,255,125,0.18);
+      --blue: #47B8FF;
+      --blue-10: rgba(71,184,255,0.10);
+      --gold: #FFB547;
+      --gold-10: rgba(255,181,71,0.10);
+      --red: #FF4747;
+      --red-10: rgba(255,71,71,0.10);
+      --t-primary: #FFFFFF;
+      --t-secondary: #8BA89A;
+      --t-muted: #4A6B57;
+      --t-on-green: #030A06;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1200px;
+      min-height: 1920px;
+      background: var(--bg-base);
+      font-family: 'VoldaSans', 'Rajdhani', 'Exo 2', system-ui, sans-serif;
+      color: var(--t-primary);
+      overflow-x: hidden;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      width: 100%;
+      height: 70px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      flex: 0 0 auto;
+    }
+
+    .topbar-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .topbar-right {
+      flex: 0 0 auto;
+    }
+
+    .btn-ghost-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .btn-ghost-nav:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+    }
+
+    .topbar-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--t-primary);
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+
+    .topbar-subtitle {
+      font-size: 12px;
+      color: var(--t-muted);
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--green-10);
+      border: 1px solid rgba(55,255,125,0.3);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.08em;
+    }
+
+    .badge-live .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse-dot 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ── MAIN CONTENT ── */
+    .content {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      max-width: 780px;
+      margin: 0 auto;
+      padding-bottom: 120px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    .card-green-glow {
+      background: var(--bg-card);
+      border: 1px solid rgba(55,255,125,0.4);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--green-glow), inset 0 0 40px rgba(55,255,125,0.03);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--t-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* ── SEARCH INPUT ── */
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--t-muted);
+      font-size: 18px;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 56px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 18px 0 48px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--t-primary);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .search-input::placeholder { color: var(--t-muted); }
+
+    .search-input:focus {
+      border-color: var(--green);
+      box-shadow: var(--green-glow);
+    }
+
+    /* ── RESULT ROWS ── */
+    .results-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-row {
+      height: 64px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      gap: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .result-row.selected {
+      border-color: var(--green);
+      box-shadow: var(--green-glow);
+    }
+
+    .result-row.locked {
+      opacity: 0.6;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .avatar-green {
+      background: var(--green-10);
+      border: 2px solid var(--green);
+      color: var(--green);
+    }
+
+    .avatar-blue {
+      background: var(--blue-10);
+      border: 2px solid var(--blue);
+      color: var(--blue);
+    }
+
+    .avatar-muted {
+      background: rgba(74,107,87,0.15);
+      border: 2px solid var(--t-muted);
+      color: var(--t-muted);
+    }
+
+    .result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--t-primary);
+      line-height: 1.2;
+    }
+
+    .result-name.locked { color: var(--t-secondary); }
+
+    .result-realname {
+      font-size: 12px;
+      color: var(--t-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .result-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .badge-unlocked {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: var(--green-10);
+      border: 1px solid rgba(55,255,125,0.3);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .badge-locked {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: var(--red-10);
+      border: 1px solid rgba(255,71,71,0.3);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .btn-select-primary {
+      height: 40px;
+      width: 100px;
+      background: var(--green);
+      border: none;
+      border-radius: 8px;
+      color: var(--t-on-green);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-select-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-select-primary:active { transform: translateY(0); }
+
+    .btn-select-ghost {
+      height: 40px;
+      width: 100px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .btn-select-ghost:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+    }
+
+    .locked-na {
+      font-size: 13px;
+      color: var(--t-muted);
+      font-weight: 600;
+    }
+
+    .selected-pill {
+      display: none;
+      padding: 3px 8px;
+      background: var(--green);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--t-on-green);
+      letter-spacing: 0.08em;
+    }
+
+    .result-row.selected .selected-pill { display: inline-block; }
+
+    /* ── SELECTED PLAYER CARD ── */
+    .selected-player-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .avatar-lg {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: var(--green-10);
+      border: 2px solid var(--green);
+      color: var(--green);
+      letter-spacing: 0.02em;
+    }
+
+    .selected-player-info { flex: 1; }
+
+    .selected-player-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--t-primary);
+      line-height: 1.2;
+    }
+
+    .selected-player-realname {
+      font-size: 13px;
+      color: var(--t-muted);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    .selected-player-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .seat-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--t-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── BUY-IN CARD ── */
+    .buyin-input-wrap {
+      position: relative;
+    }
+
+    .buyin-prefix {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      pointer-events: none;
+    }
+
+    .buyin-input {
+      width: 100%;
+      height: 72px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 18px 0 46px;
+      font-family: inherit;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--t-primary);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .buyin-input:focus {
+      border-color: var(--green);
+      box-shadow: var(--green-glow);
+    }
+
+    .quick-select-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .quick-btn {
+      flex: 1;
+      height: 56px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .quick-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+    }
+
+    .quick-btn.active {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-10);
+      box-shadow: var(--green-glow);
+    }
+
+    .buyin-summary {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--t-muted);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── CONFIRMATION STATE ── */
+    .confirm-card {
+      background: var(--gold-10);
+      border: 1px solid rgba(255,181,71,0.35);
+      border-radius: 16px;
+      padding: 32px 28px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      text-align: center;
+    }
+
+    .confirm-card.visible {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .confirm-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.03em;
+    }
+
+    .confirm-body {
+      font-size: 14px;
+      color: var(--t-secondary);
+      font-weight: 500;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,181,71,0.15);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 2s linear;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-card {
+      background: var(--green-10);
+      border: 1px solid rgba(55,255,125,0.4);
+      border-radius: 16px;
+      padding: 40px 28px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      text-align: center;
+    }
+
+    .success-card.visible {
+      display: flex;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      color: var(--t-on-green);
+      box-shadow: 0 0 30px rgba(55,255,125,0.35);
+    }
+
+    .success-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.02em;
+    }
+
+    .success-body {
+      font-size: 14px;
+      color: var(--t-secondary);
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .btn-success-primary {
+      height: 52px;
+      padding: 0 36px;
+      background: var(--green);
+      border: none;
+      border-radius: 10px;
+      color: var(--t-on-green);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.04em;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-success-primary:hover { opacity: 0.88; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── BOTTOM ACTION BAR ── */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1200px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 200;
+    }
+
+    .btn-cancel {
+      height: 48px;
+      padding: 0 28px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--t-secondary);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-cancel:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-10);
+    }
+
+    .btn-confirm-primary {
+      height: 56px;
+      width: 280px;
+      background: var(--green);
+      border: none;
+      border-radius: 10px;
+      color: var(--t-on-green);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.05em;
+      box-shadow: var(--green-glow);
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-confirm-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-confirm-primary:active { transform: translateY(0); }
+    .btn-confirm-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── DIVIDERS ── */
+    .divider {
+      height: 1px;
+      background: var(--border-sub);
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="07_Table_Seating_View.html" class="btn-ghost-nav">
+        <span>←</span> Table View
+      </a>
+    </div>
+    <div class="topbar-center">
+      <div class="topbar-title">Onboard Player · Seat 5</div>
+      <div class="topbar-subtitle">TBL-03 · Texas Hold'em</div>
+    </div>
+    <div class="topbar-right">
+      <div class="badge-live">
+        <span class="dot"></span> LIVE
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- SECTION 1: SEARCH PLAYER -->
+    <div class="card" id="searchCard">
+      <div class="section-label">Search Player by Screen Name</div>
+
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Type screen name…"
+          value="River"
+          id="searchInput"
+        />
+      </div>
+
+      <div class="results-list">
+
+        <!-- Row 1: RiverBoss — pre-selected -->
+        <div class="result-row selected" id="row-riverboss" data-player="riverboss">
+          <div class="avatar avatar-green">RB</div>
+          <div class="result-info">
+            <div class="result-name">RiverBoss <span class="selected-pill">SELECTED</span></div>
+            <div class="result-realname">Divya P.</div>
+          </div>
+          <div class="result-right">
+            <span class="badge-unlocked">🔓 UNLOCKED</span>
+            <button class="btn-select-primary" onclick="selectPlayer('riverboss')">SELECT</button>
+          </div>
+        </div>
+
+        <!-- Row 2: RiverFish — locked -->
+        <div class="result-row locked" id="row-riverfish">
+          <div class="avatar avatar-muted" style="opacity:0.5;">RF</div>
+          <div class="result-info">
+            <div class="result-name locked" style="opacity:0.5;">RiverFish</div>
+            <div class="result-realname">Amit K.</div>
+          </div>
+          <div class="result-right">
+            <span class="badge-locked">🔒 LOCKED</span>
+            <span class="locked-na">(N/A)</span>
+          </div>
+        </div>
+
+        <!-- Row 3: RiverDeep — selectable -->
+        <div class="result-row" id="row-riverdeep" data-player="riverdeep">
+          <div class="avatar avatar-blue">RD</div>
+          <div class="result-info">
+            <div class="result-name">RiverDeep <span class="selected-pill">SELECTED</span></div>
+            <div class="result-realname">Sonal R.</div>
+          </div>
+          <div class="result-right">
+            <span class="badge-unlocked">🔓 UNLOCKED</span>
+            <button class="btn-select-ghost" onclick="selectPlayer('riverdeep')">SELECT</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: SELECTED PLAYER -->
+    <div class="card-green-glow" id="selectedPlayerCard">
+      <div class="section-label">Selected Player</div>
+      <div class="selected-player-row">
+        <div class="avatar-lg" id="selectedAvatar">RB</div>
+        <div class="selected-player-info">
+          <div class="selected-player-name" id="selectedName">RiverBoss</div>
+          <div class="selected-player-realname" id="selectedRealName">Divya Pillai</div>
+        </div>
+        <div class="selected-player-right">
+          <span class="badge-unlocked">🔓 UNLOCKED</span>
+          <span class="seat-tag">Seat 5 · TBL-03</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: BUY-IN AMOUNT -->
+    <div class="card" id="buyinCard">
+      <div class="section-label">Buy-In Amount</div>
+
+      <div class="buyin-input-wrap">
+        <span class="buyin-prefix">$</span>
+        <input
+          type="text"
+          class="buyin-input"
+          value="1,000"
+          id="buyinInput"
+        />
+      </div>
+
+      <div class="quick-select-row">
+        <button class="quick-btn" onclick="setAmount(500, this)">$500</button>
+        <button class="quick-btn active" onclick="setAmount(1000, this)">$1,000</button>
+        <button class="quick-btn" onclick="setAmount(2000, this)">$2,000</button>
+        <button class="quick-btn" onclick="setAmount(5000, this)">$5,000</button>
+      </div>
+
+      <div class="buyin-summary">
+        Seat: 5 of 8 &nbsp;·&nbsp; Table: TBL-03 &nbsp;·&nbsp; Tournament: Grand Poker Championship
+      </div>
+    </div>
+
+    <!-- CONFIRMATION STATE -->
+    <div class="confirm-card" id="confirmCard">
+      <div class="confirm-title">⏳ Confirming with Tournament Server…</div>
+      <div class="progress-bar-wrap" style="width:100%">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="confirm-body">Please wait. Do not close this screen.</div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-card" id="successCard">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Player Onboarded Successfully!</div>
+      <div class="success-body" id="successBody">
+        RiverBoss has been seated at Seat 5, TBL-03.<br>
+        Wallet is now <strong style="color:var(--red)">LOCKED</strong>.
+      </div>
+      <a href="07_Table_Seating_View.html" class="btn-success-primary">
+        ← Back to Table View
+      </a>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ACTION BAR -->
+  <div class="bottom-bar" id="bottomBar">
+    <a href="07_Table_Seating_View.html" class="btn-cancel">Cancel</a>
+    <button class="btn-confirm-primary" id="confirmBtn" onclick="handleConfirm()">
+      ✓ Confirm Onboarding
+    </button>
+  </div>
+
+  <script>
+    // ── PLAYER DATA ──
+    const playerData = {
+      riverboss: { avatar: 'RB', name: 'RiverBoss', realName: 'Divya Pillai', avatarClass: 'avatar-green' },
+      riverdeep: { avatar: 'RD', name: 'RiverDeep', realName: 'Sonal Rao', avatarClass: 'avatar-blue' }
+    };
+
+    let activePlayer = 'riverboss';
+
+    function selectPlayer(playerId) {
+      if (!playerData[playerId]) return;
+      activePlayer = playerId;
+
+      // Update row highlight
+      document.querySelectorAll('.result-row[data-player]').forEach(row => {
+        row.classList.remove('selected');
+      });
+      document.getElementById('row-' + playerId).classList.add('selected');
+
+      // Update selected player card
+      const p = playerData[playerId];
+      document.getElementById('selectedAvatar').textContent = p.avatar;
+      document.getElementById('selectedAvatar').className = 'avatar-lg';
+      // keep green styling
+      document.getElementById('selectedName').textContent = p.name;
+      document.getElementById('selectedRealName').textContent = p.realName;
+
+      // Update success body text
+      document.getElementById('successBody').innerHTML =
+        p.name + ' has been seated at Seat 5, TBL-03.<br>Wallet is now <strong style="color:var(--red)">LOCKED</strong>.';
+    }
+
+    // ── QUICK SELECT BUTTONS ──
+    function setAmount(amount, btn) {
+      document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('buyinInput').value = amount.toLocaleString();
+    }
+
+    // ── CONFIRM ONBOARDING ──
+    function handleConfirm() {
+      const confirmBtn = document.getElementById('confirmBtn');
+      const bottomBar = document.getElementById('bottomBar');
+      const confirmCard = document.getElementById('confirmCard');
+      const progressBar = document.getElementById('progressBar');
+      const successCard = document.getElementById('successCard');
+
+      // Hide sections, show confirm state
+      confirmBtn.disabled = true;
+      bottomBar.style.display = 'none';
+
+      confirmCard.classList.add('visible');
+
+      // Animate progress bar
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          progressBar.style.width = '100%';
+        });
+      });
+
+      // After 2s: show success
+      setTimeout(() => {
+        confirmCard.classList.remove('visible');
+        successCard.classList.add('visible');
+      }, 2000);
+
+      // After 3.5s: redirect
+      setTimeout(() => {
+        window.location.href = '07_Table_Seating_View.html';
+      }, 3500);
+    }
+  </script>
+
+</body>
+</html>

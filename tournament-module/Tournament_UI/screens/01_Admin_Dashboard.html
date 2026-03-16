@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>Predicta Tournament — Admin Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --bg-base:      #030A06;
+      --bg-card:      #0A1A0F;
+      --bg-elevated:  #0F2218;
+      --bg-hover:     #142B1E;
+      --border:       #1A3A26;
+      --border-sub:   #0D1F14;
+
+      --green:        #37FF7D;
+      --green-10:     rgba(55,255,125,0.10);
+      --green-20:     rgba(55,255,125,0.20);
+      --green-glow:   0 0 20px rgba(55,255,125,0.18);
+
+      --blue:         #47B8FF;
+      --blue-10:      rgba(71,184,255,0.10);
+      --gold:         #FFB547;
+      --gold-10:      rgba(255,181,71,0.10);
+      --red:          #FF4747;
+      --red-10:       rgba(255,71,71,0.10);
+
+      --t-primary:    #FFFFFF;
+      --t-secondary:  #8BA89A;
+      --t-muted:      #4A6B57;
+      --t-on-green:   #030A06;
+
+      --font: 'VoldaSans', 'Rajdhani', 'Exo 2', system-ui, sans-serif;
+
+      --r-sm:  6px;
+      --r-md:  8px;
+      --r-lg:  12px;
+      --r-xl:  16px;
+    }
+
+    /* ─────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1440px;
+      min-height: 900px;
+      background: var(--bg-base);
+      color: var(--t-primary);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─────────────────────────────────────────
+       LAYOUT SHELL
+    ───────────────────────────────────────── */
+    .app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ─────────────────────────────────────────
+       SIDEBAR
+    ───────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--green);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700;
+      color: var(--t-on-green);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .logo-copy { display: flex; flex-direction: column; gap: 1px; }
+    .logo-name {
+      font-size: 15px; font-weight: 700;
+      color: var(--t-primary); letter-spacing: 0.4px;
+    }
+    .logo-tag {
+      font-size: 9px; font-weight: 600;
+      color: var(--t-muted); letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    /* Nav */
+    .nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav-section { margin-bottom: 4px; }
+
+    .nav-label {
+      padding: 10px 20px 4px;
+      font-size: 9px; font-weight: 700;
+      color: var(--t-muted); letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 20px;
+      font-size: 13px; font-weight: 500;
+      color: var(--t-secondary);
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      position: relative;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--bg-hover); color: var(--t-primary); }
+
+    .nav-item.active {
+      background: var(--green-10);
+      color: var(--green);
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--green);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item svg { flex-shrink: 0; opacity: 0.65; }
+    .nav-item.active svg { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--green);
+      color: var(--t-on-green);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      line-height: 1.4;
+    }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 32px; height: 32px;
+      background: var(--green-10);
+      border: 1.5px solid var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+    .user-copy { flex: 1; min-width: 0; }
+    .user-name { font-size: 12px; font-weight: 600; color: var(--t-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 9px; font-weight: 600; color: var(--t-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .more-btn {
+      width: 26px; height: 26px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--t-muted);
+      transition: border-color 0.12s, color 0.12s;
+      flex-shrink: 0;
+    }
+    .more-btn:hover { border-color: var(--t-muted); color: var(--t-primary); }
+
+    /* ─────────────────────────────────────────
+       MAIN AREA
+    ───────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 0; }
+
+    /* Topbar */
+    .topbar {
+      height: 60px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 16px;
+      flex-shrink: 0;
+    }
+    .topbar-title { flex: 1; min-width: 0; }
+    .topbar-title h1 { font-size: 17px; font-weight: 700; color: var(--t-primary); letter-spacing: 0.3px; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .live-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      background: var(--green-10);
+      border: 1px solid rgba(55,255,125,0.3);
+      border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      color: var(--green); letter-spacing: 0.8px;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+    .topbar-date { font-size: 11px; color: var(--t-muted); font-weight: 500; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--t-secondary);
+      transition: border-color 0.12s, color 0.12s;
+      position: relative;
+    }
+    .icon-btn:hover { border-color: var(--t-muted); color: var(--t-primary); }
+    .icon-btn .notif-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 7px; height: 7px;
+      background: var(--green); border-radius: 50%;
+      border: 1.5px solid var(--bg-card);
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 0 16px; height: 36px;
+      background: var(--green); color: var(--t-on-green);
+      border: none; border-radius: var(--r-md);
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.5px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .btn-primary:hover { background: #4AFFA0; }
+
+    /* ─────────────────────────────────────────
+       CONTENT SCROLL AREA
+    ───────────────────────────────────────── */
+    .content {
+      flex: 1; overflow-y: auto;
+      padding: 24px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ─────────────────────────────────────────
+       STAT CARDS ROW
+    ───────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      display: flex; flex-direction: column; gap: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .stat-card:hover {
+      border-color: rgba(55,255,125,0.4);
+      box-shadow: var(--green-glow);
+    }
+
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-icon-wrap {
+      width: 42px; height: 42px;
+      background: var(--green-10);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green);
+    }
+    .stat-trend {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px;
+    }
+    .trend-up   { color: var(--green); background: var(--green-10); }
+    .trend-down { color: var(--red);   background: var(--red-10); }
+    .trend-neu  { color: var(--t-muted); background: var(--bg-elevated); }
+
+    .stat-value {
+      font-size: 34px; font-weight: 700;
+      color: var(--t-primary); line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .stat-label {
+      font-size: 11px; font-weight: 600;
+      color: var(--t-muted); letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .stat-sub {
+      font-size: 11px; color: var(--t-muted);
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* ─────────────────────────────────────────
+       MAIN GRID (left + right panel)
+    ───────────────────────────────────────── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* Card shell */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--t-primary); letter-spacing: 0.3px; }
+    .card-sub { font-size: 10px; color: var(--t-muted); margin-top: 2px; letter-spacing: 0.5px; }
+
+    .card-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* Tab switcher */
+    .tabs {
+      display: flex; gap: 2px;
+      padding: 3px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+    }
+    .tab {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      color: var(--t-muted); cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      user-select: none;
+    }
+    .tab.active { background: var(--bg-card); color: var(--t-primary); }
+
+    /* ─────────────────────────────────────────
+       TOURNAMENT TABLE
+    ───────────────────────────────────────── */
+    .t-table { width: 100%; border-collapse: collapse; }
+
+    .t-table th {
+      padding: 10px 20px;
+      text-align: left;
+      font-size: 10px; font-weight: 700;
+      color: var(--t-muted); letter-spacing: 1.2px;
+      text-transform: uppercase;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+    }
+    .t-table th:last-child { text-align: right; }
+
+    .t-table td {
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--border-sub);
+      vertical-align: middle;
+    }
+    .t-table tr:last-child td { border-bottom: none; }
+
+    .t-table tbody tr {
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .t-table tbody tr:hover td { background: var(--bg-hover); }
+
+    /* Tournament name cell */
+    .t-name-cell { display: flex; flex-direction: column; gap: 3px; }
+    .t-main-name { font-size: 13px; font-weight: 600; color: var(--t-primary); }
+    .t-id { font-size: 10px; color: var(--t-muted); font-weight: 500; }
+
+    /* Game tag */
+    .game-tag {
+      display: inline-flex; align-items: center;
+      padding: 3px 8px;
+      border-radius: var(--r-sm);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase;
+    }
+    .tag-poker    { background: var(--blue-10); color: var(--blue);  border: 1px solid rgba(71,184,255,0.25); }
+    .tag-teenpatti{ background: var(--gold-10); color: var(--gold);  border: 1px solid rgba(255,181,71,0.25); }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .s-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    .badge-live      { background: var(--green-10); color: var(--green); }
+    .badge-live .s-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.6s infinite; }
+
+    .badge-sched     { background: var(--blue-10); color: var(--blue); }
+    .badge-sched .s-dot { background: var(--blue); }
+
+    .badge-ended     { background: rgba(74,107,87,0.15); color: var(--t-muted); }
+    .badge-ended .s-dot { background: var(--t-muted); }
+
+    /* Progress bar */
+    .prog-wrap { width: 70px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--green); border-radius: 2px; }
+
+    /* Number cell */
+    .num { font-size: 13px; font-weight: 600; color: var(--t-secondary); }
+    .num-muted { font-size: 12px; color: var(--t-muted); }
+
+    /* Row actions */
+    .row-acts { display: flex; gap: 6px; justify-content: flex-end; }
+    .row-act-btn {
+      width: 28px; height: 28px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--t-secondary);
+      transition: border-color 0.12s, color 0.12s;
+    }
+    .row-act-btn:hover { border-color: var(--green); color: var(--green); }
+    .row-act-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+    /* ─────────────────────────────────────────
+       RIGHT PANEL
+    ───────────────────────────────────────── */
+    .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+    /* Table Health */
+    .health-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; padding: 14px 16px;
+    }
+    .health-cell {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-sub);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .health-cell.offline { border-color: rgba(255,71,71,0.2); }
+
+    .h-top { display: flex; justify-content: space-between; align-items: center; }
+    .h-id { font-size: 11px; font-weight: 700; color: var(--t-primary); letter-spacing: 0.5px; }
+    .h-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .h-dot.on  { background: var(--green); box-shadow: 0 0 7px var(--green); animation: pulse 1.6s infinite; }
+    .h-dot.idle{ background: var(--gold); }
+    .h-dot.off { background: var(--red); }
+
+    .h-count { font-size: 22px; font-weight: 700; color: var(--t-primary); line-height: 1; }
+    .h-label { font-size: 9px; color: var(--t-muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .h-rate  { font-size: 10px; color: var(--t-secondary); font-weight: 600; }
+
+    .h-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; }
+    .h-bar { height: 100%; background: var(--green); border-radius: 2px; }
+    .h-bar.gold { background: var(--gold); }
+    .h-bar.red  { background: var(--red); }
+
+    /* Leaderboard mini */
+    .lb-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 74px;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border-sub);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--bg-hover); }
+
+    .lb-rank { font-size: 13px; font-weight: 700; text-align: center; color: var(--t-muted); }
+    .lb-rank.r1 { color: #FFD700; }
+    .lb-rank.r2 { color: #C0C0C0; }
+    .lb-rank.r3 { color: #CD7F32; }
+
+    .lb-player { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .lb-screen { font-size: 12px; font-weight: 600; color: var(--t-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-table-tag { font-size: 10px; color: var(--t-muted); }
+
+    .lb-pts { text-align: right; }
+    .lb-pts-val { font-size: 13px; font-weight: 700; color: var(--green); }
+    .lb-pts-sub { font-size: 9px; color: var(--t-muted); }
+
+    /* Activity feed */
+    .feed { padding: 4px 16px 14px; }
+    .feed-item {
+      display: flex; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border-sub);
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .feed-dot.green { background: var(--green); }
+    .feed-dot.blue  { background: var(--blue); }
+    .feed-dot.gold  { background: var(--gold); }
+    .feed-dot.red   { background: var(--red); }
+    .feed-content { flex: 1; min-width: 0; }
+    .feed-text { font-size: 11px; color: var(--t-secondary); line-height: 1.45; }
+    .feed-text strong { color: var(--t-primary); font-weight: 600; }
+    .feed-time { font-size: 10px; color: var(--t-muted); margin-top: 2px; }
+
+    /* View all link */
+    .view-all {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 11px 16px;
+      font-size: 11px; font-weight: 600;
+      color: var(--t-muted); cursor: pointer;
+      border-top: 1px solid var(--border);
+      transition: color 0.12s;
+    }
+    .view-all:hover { color: var(--green); }
+
+    /* ─────────────────────────────────────────
+       SCROLLBAR (global)
+    ───────────────────────────────────────── */
+    * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+    /* ─────────────────────────────────────────
+       UTILITY
+    ───────────────────────────────────────── */
+    .flex-center { display: flex; align-items: center; }
+    .gap-6  { gap: 6px; }
+    .gap-8  { gap: 8px; }
+    .gap-10 { gap: 10px; }
+    .mt-2 { margin-top: 2px; }
+    .mt-4 { margin-top: 4px; }
+
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-mark">PT</div>
+      <div class="logo-copy">
+        <div class="logo-name">Predicta</div>
+        <div class="logo-tag">Tournament</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+
+      <div class="nav-section">
+        <div class="nav-label">Main</div>
+
+        <!-- Dashboard (active) -->
+        <div class="nav-item active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </div>
+
+        <!-- Tournaments -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+            <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+          </svg>
+          Tournaments
+          <span class="nav-badge">3</span>
+        </div>
+
+        <!-- Players -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Players
+        </div>
+
+        <!-- Tables -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+            <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+          </svg>
+          Tables
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Display</div>
+
+        <!-- Projector -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
+          </svg>
+          Projector View
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+          </svg>
+          Leaderboard
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+
+        <!-- Settings -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+          </svg>
+          Settings
+        </div>
+
+        <!-- Logs -->
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          System Logs
+        </div>
+      </div>
+
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="avatar">SA</div>
+      <div class="user-copy">
+        <div class="user-name">Super Admin</div>
+        <div class="user-role">Administrator</div>
+      </div>
+      <div class="more-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT AREA
+  ═══════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1>Command Center</h1>
+      </div>
+      <div class="topbar-meta">
+        <div class="live-pill">
+          <span class="live-dot"></span>
+          3 LIVE
+        </div>
+        <div class="topbar-date">Thu, 26 Feb 2026 &nbsp;·&nbsp; 19:42 IST</div>
+      </div>
+      <div class="topbar-actions">
+        <!-- Notification -->
+        <div class="icon-btn">
+          <span class="notif-dot"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </div>
+        <!-- Refresh -->
+        <div class="icon-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </div>
+        <!-- New Tournament -->
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Tournament
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <div class="content">
+
+      <!-- ── STAT CARDS ── -->
+      <div class="stats-row">
+
+        <!-- Active Tournaments -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+              </svg>
+            </div>
+            <span class="stat-trend trend-up">+1 today</span>
+          </div>
+          <div>
+            <div class="stat-value">3</div>
+            <div class="stat-label mt-4">Active Tournaments</div>
+          </div>
+          <div class="stat-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2 scheduled upcoming
+          </div>
+        </div>
+
+        <!-- Live Tables -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+                <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+              </svg>
+            </div>
+            <span class="stat-trend trend-neu">8/12 online</span>
+          </div>
+          <div>
+            <div class="stat-value">12</div>
+            <div class="stat-label mt-4">Live Tables</div>
+          </div>
+          <div class="stat-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            4 tables idle
+          </div>
+        </div>
+
+        <!-- Registered Players -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <span class="stat-trend trend-up">+14 today</span>
+          </div>
+          <div>
+            <div class="stat-value">247</div>
+            <div class="stat-label mt-4">Registered Players</div>
+          </div>
+          <div class="stat-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            192 active right now
+          </div>
+        </div>
+
+        <!-- Hands Today -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="9" height="9" rx="2"/><rect x="13" y="2" width="9" height="9" rx="2"/>
+                <rect x="2" y="13" width="9" height="9" rx="2"/><rect x="13" y="13" width="9" height="9" rx="2"/>
+              </svg>
+            </div>
+            <span class="stat-trend trend-up">+320/hr</span>
+          </div>
+          <div>
+            <div class="stat-value">1,840</div>
+            <div class="stat-label mt-4">Hands Played Today</div>
+          </div>
+          <div class="stat-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            Avg 153/table today
+          </div>
+        </div>
+
+      </div>
+      <!-- END STAT CARDS -->
+
+
+      <!-- ── MAIN GRID ── -->
+      <div class="main-grid">
+
+        <!-- ── LEFT COL: Tournament Table ── -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Active Tournaments</div>
+              <div class="card-sub">5 TOTAL &nbsp;·&nbsp; 3 LIVE &nbsp;·&nbsp; 2 SCHEDULED</div>
+            </div>
+            <div class="card-actions">
+              <div class="tabs">
+                <div class="tab active">All</div>
+                <div class="tab">Poker</div>
+                <div class="tab">Teen Patti</div>
+              </div>
+              <div class="icon-btn" style="width:32px;height:32px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <table class="t-table">
+            <thead>
+              <tr>
+                <th style="width:30%">Tournament</th>
+                <th style="width:14%">Game</th>
+                <th style="width:12%">Tables</th>
+                <th style="width:10%">Players</th>
+                <th style="width:14%">Progress</th>
+                <th style="width:12%">Status</th>
+                <th style="width:8%"></th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- Row 1 -->
+              <tr>
+                <td>
+                  <div class="t-name-cell">
+                    <div class="t-main-name">Grand Poker Championship</div>
+                    <div class="t-id">TRN-2026-0044</div>
+                  </div>
+                </td>
+                <td><span class="game-tag tag-poker">Hold'em</span></td>
+                <td><span class="num">4</span> <span class="num-muted">/ 6</span></td>
+                <td><span class="num">82</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div class="prog-wrap"><div class="prog-fill" style="width:68%"></div></div>
+                    <span style="font-size:10px;color:var(--t-muted);">3h 22m left</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-badge badge-live">
+                    <span class="s-dot"></span>Live
+                  </div>
+                </td>
+                <td>
+                  <div class="row-acts">
+                    <div class="row-act-btn" title="View Details">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="row-act-btn" title="Edit">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr>
+                <td>
+                  <div class="t-name-cell">
+                    <div class="t-main-name">Teen Patti Classic</div>
+                    <div class="t-id">TRN-2026-0043</div>
+                  </div>
+                </td>
+                <td><span class="game-tag tag-teenpatti">Classic</span></td>
+                <td><span class="num">6</span> <span class="num-muted">/ 8</span></td>
+                <td><span class="num">103</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div class="prog-wrap"><div class="prog-fill" style="width:55%"></div></div>
+                    <span style="font-size:10px;color:var(--t-muted);">4h 10m left</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-badge badge-live">
+                    <span class="s-dot"></span>Live
+                  </div>
+                </td>
+                <td>
+                  <div class="row-acts">
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr>
+                <td>
+                  <div class="t-name-cell">
+                    <div class="t-main-name">Omaha Pro Series</div>
+                    <div class="t-id">TRN-2026-0042</div>
+                  </div>
+                </td>
+                <td><span class="game-tag tag-poker">Omaha</span></td>
+                <td><span class="num">2</span> <span class="num-muted">/ 4</span></td>
+                <td><span class="num">62</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div class="prog-wrap"><div class="prog-fill" style="width:30%"></div></div>
+                    <span style="font-size:10px;color:var(--t-muted);">6h 05m left</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-badge badge-live">
+                    <span class="s-dot"></span>Live
+                  </div>
+                </td>
+                <td>
+                  <div class="row-acts">
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr>
+                <td>
+                  <div class="t-name-cell">
+                    <div class="t-main-name">Weekend Teen Patti</div>
+                    <div class="t-id">TRN-2026-0045</div>
+                  </div>
+                </td>
+                <td><span class="game-tag tag-teenpatti">Muflis</span></td>
+                <td><span class="num-muted">—</span></td>
+                <td><span class="num-muted">—</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div class="prog-wrap"><div class="prog-fill" style="width:0%"></div></div>
+                    <span style="font-size:10px;color:var(--blue);">Starts Mar 1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-badge badge-sched">
+                    <span class="s-dot"></span>Scheduled
+                  </div>
+                </td>
+                <td>
+                  <div class="row-acts">
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 5 -->
+              <tr>
+                <td>
+                  <div class="t-name-cell">
+                    <div class="t-main-name">Pineapple Open</div>
+                    <div class="t-id">TRN-2026-0046</div>
+                  </div>
+                </td>
+                <td><span class="game-tag tag-poker">Pineapple</span></td>
+                <td><span class="num-muted">—</span></td>
+                <td><span class="num-muted">—</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div class="prog-wrap"><div class="prog-fill" style="width:0%"></div></div>
+                    <span style="font-size:10px;color:var(--blue);">Starts Mar 5</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-badge badge-sched">
+                    <span class="s-dot"></span>Scheduled
+                  </div>
+                </td>
+                <td>
+                  <div class="row-acts">
+                    <div class="row-act-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="row-act-btn danger">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+
+          <!-- View all -->
+          <div class="view-all">
+            View all 5 tournaments
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <!-- END LEFT COL -->
+
+
+        <!-- ── RIGHT COL ── -->
+        <div class="right-col">
+
+          <!-- Table Health Monitor -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Table Health</div>
+                <div class="card-sub">12 TABLES &nbsp;·&nbsp; 8 ONLINE</div>
+              </div>
+              <div class="view-all" style="border:none;padding:0;font-size:10px;">
+                View all
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+
+            <div class="health-grid">
+
+              <!-- TBL-01 -->
+              <div class="health-cell">
+                <div class="h-top">
+                  <span class="h-id">TBL-01</span>
+                  <span class="h-dot on"></span>
+                </div>
+                <div class="h-count">8<span style="font-size:13px;color:var(--t-muted);font-weight:500;">/8</span></div>
+                <div class="h-label">Players</div>
+                <div class="h-bar-wrap"><div class="h-bar" style="width:100%"></div></div>
+                <div class="h-rate">342 hands/hr</div>
+              </div>
+
+              <!-- TBL-02 -->
+              <div class="health-cell">
+                <div class="h-top">
+                  <span class="h-id">TBL-02</span>
+                  <span class="h-dot on"></span>
+                </div>
+                <div class="h-count">7<span style="font-size:13px;color:var(--t-muted);font-weight:500;">/8</span></div>
+                <div class="h-label">Players</div>
+                <div class="h-bar-wrap"><div class="h-bar" style="width:88%"></div></div>
+                <div class="h-rate">289 hands/hr</div>
+              </div>
+
+              <!-- TBL-03 -->
+              <div class="health-cell">
+                <div class="h-top">
+                  <span class="h-id">TBL-03</span>
+                  <span class="h-dot on"></span>
+                </div>
+                <div class="h-count">6<span style="font-size:13px;color:var(--t-muted);font-weight:500;">/8</span></div>
+                <div class="h-label">Players</div>
+                <div class="h-bar-wrap"><div class="h-bar" style="width:75%"></div></div>
+                <div class="h-rate">198 hands/hr</div>
+              </div>
+
+              <!-- TBL-04 (Idle) -->
+              <div class="health-cell">
+                <div class="h-top">
+                  <span class="h-id">TBL-04</span>
+                  <span class="h-dot idle"></span>
+                </div>
+                <div class="h-count" style="color:var(--gold);">3<span style="font-size:13px;color:var(--t-muted);font-weight:500;">/8</span></div>
+                <div class="h-label">Players</div>
+                <div class="h-bar-wrap"><div class="h-bar gold" style="width:38%"></div></div>
+                <div class="h-rate" style="color:var(--gold);">Waiting...</div>
+              </div>
+
+              <!-- TBL-05 -->
+              <div class="health-cell">
+                <div class="h-top">
+                  <span class="h-id">TBL-05</span>
+                  <span class="h-dot on"></span>
+                </div>
+                <div class="h-count">8<span style="font-size:13px;color:var(--t-muted);font-weight:500;">/8</span></div>
+                <div class="h-label">Players</div>
+                <div class="h-bar-wrap"><div class="h-bar" style="width:100%"></div></div>
+                <div class="h-rate">310 hands/hr</div>
+              </div>
+
+              <!-- TBL-06 (Offline) -->
+              <div class="health-cell offline">
+                <div class="h-top">
+                  <span class="h-id">TBL-06</span>
+                  <span class="h-dot off"></span>
+                </div>
+                <div class="h-count" style="color:var(--red);">—</div>
+                <div class="h-label">Offline</div>
+                <div class="h-bar-wrap"><div class="h-bar red" style="width:0%"></div></div>
+                <div class="h-rate" style="color:var(--red);">No connection</div>
+              </div>
+
+            </div>
+          </div>
+          <!-- END HEALTH -->
+
+
+          <!-- Live Leaderboard Mini -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Top Players</div>
+                <div class="card-sub">Grand Poker Championship</div>
+              </div>
+              <div class="tabs">
+                <div class="tab active">Poker</div>
+                <div class="tab">Teen Patti</div>
+              </div>
+            </div>
+
+            <!-- Rows -->
+            <div class="lb-row">
+              <div class="lb-rank r1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD700" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div class="lb-player">
+                <div class="lb-screen">ShadowAce</div>
+                <div class="lb-table-tag">TBL-03 · Arjun M.</div>
+              </div>
+              <div class="lb-pts">
+                <div class="lb-pts-val">14,820</div>
+                <div class="lb-pts-sub">88 hands</div>
+              </div>
+            </div>
+
+            <div class="lb-row">
+              <div class="lb-rank r2">2</div>
+              <div class="lb-player">
+                <div class="lb-screen">NightFold</div>
+                <div class="lb-table-tag">TBL-01 · Priya S.</div>
+              </div>
+              <div class="lb-pts">
+                <div class="lb-pts-val">13,445</div>
+                <div class="lb-pts-sub">72 hands</div>
+              </div>
+            </div>
+
+            <div class="lb-row">
+              <div class="lb-rank r3">3</div>
+              <div class="lb-player">
+                <div class="lb-screen">BluffKing</div>
+                <div class="lb-table-tag">TBL-02 · Rahul D.</div>
+              </div>
+              <div class="lb-pts">
+                <div class="lb-pts-val">12,100</div>
+                <div class="lb-pts-sub">91 hands</div>
+              </div>
+            </div>
+
+            <div class="lb-row">
+              <div class="lb-rank">4</div>
+              <div class="lb-player">
+                <div class="lb-screen">CardShark</div>
+                <div class="lb-table-tag">TBL-01 · Karan T.</div>
+              </div>
+              <div class="lb-pts">
+                <div class="lb-pts-val">11,780</div>
+                <div class="lb-pts-sub">65 hands</div>
+              </div>
+            </div>
+
+            <div class="lb-row">
+              <div class="lb-rank">5</div>
+              <div class="lb-player">
+                <div class="lb-screen">RiverBoss</div>
+                <div class="lb-table-tag">TBL-04 · Divya P.</div>
+              </div>
+              <div class="lb-pts">
+                <div class="lb-pts-val">10,990</div>
+                <div class="lb-pts-sub">58 hands</div>
+              </div>
+            </div>
+
+            <div class="view-all">
+              Full leaderboard (82 players)
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+          <!-- END LEADERBOARD -->
+
+
+          <!-- Activity Feed -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Recent Activity</div>
+                <div class="card-sub">Real-time event log</div>
+              </div>
+              <div class="live-pill" style="font-size:10px;padding:3px 8px;">
+                <span class="live-dot"></span>
+                Live
+              </div>
+            </div>
+
+            <div class="feed">
+
+              <div class="feed-item">
+                <span class="feed-dot green"></span>
+                <div class="feed-content">
+                  <div class="feed-text"><strong>ShadowAce</strong> won hand #144 at TBL-03 +320 pts</div>
+                  <div class="feed-time">Just now</div>
+                </div>
+              </div>
+
+              <div class="feed-item">
+                <span class="feed-dot blue"></span>
+                <div class="feed-content">
+                  <div class="feed-text"><strong>TBL-04</strong> attached to Grand Poker Championship</div>
+                  <div class="feed-time">5 min ago</div>
+                </div>
+              </div>
+
+              <div class="feed-item">
+                <span class="feed-dot green"></span>
+                <div class="feed-content">
+                  <div class="feed-text"><strong>KingsRansom</strong> registered — badge printed</div>
+                  <div class="feed-time">8 min ago</div>
+                </div>
+              </div>
+
+              <div class="feed-item">
+                <span class="feed-dot gold"></span>
+                <div class="feed-content">
+                  <div class="feed-text"><strong>AceDeep</strong> marked Sit Out at TBL-02</div>
+                  <div class="feed-time">12 min ago</div>
+                </div>
+              </div>
+
+              <div class="feed-item">
+                <span class="feed-dot blue"></span>
+                <div class="feed-content">
+                  <div class="feed-text"><strong>RiverBoss</strong> rebuyed ₹2,000 at TBL-04</div>
+                  <div class="feed-time">15 min ago</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="view-all">
+              View full log
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+          <!-- END ACTIVITY -->
+
+        </div>
+        <!-- END RIGHT COL -->
+
+      </div>
+      <!-- END MAIN GRID -->
+
+    </div>
+    <!-- END CONTENT -->
+
+  </main>
+  <!-- END MAIN -->
+
+</div>
+<!-- END APP -->
+</body>
+</html>
