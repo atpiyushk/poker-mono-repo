@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Predicta Tournament — Prototype Navigation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #030A06;
+    --bg-card: #0A1A0F;
+    --bg-elevated: #0F2218;
+    --bg-hover: #142B1E;
+    --border: #1A3A26;
+    --border-sub: #0D1F14;
+    --green: #37FF7D;
+    --green-10: rgba(55,255,125,0.10);
+    --green-glow: 0 0 20px rgba(55,255,125,0.18);
+    --blue: #47B8FF;
+    --blue-10: rgba(71,184,255,0.10);
+    --gold: #FFB547;
+    --gold-10: rgba(255,181,71,0.10);
+    --red: #FF4747;
+    --red-10: rgba(255,71,71,0.10);
+    --t-primary: #FFFFFF;
+    --t-secondary: #8BA89A;
+    --t-muted: #4A6B57;
+    --t-on-green: #030A06;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1440px;
+    min-height: 900px;
+    background: var(--bg-base);
+    font-family: 'VoldaSans', 'Rajdhani', 'Exo 2', system-ui, sans-serif;
+    color: var(--t-primary);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 48px 64px 0;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-mark-lg {
+    width: 44px;
+    height: 44px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--t-on-green);
+    flex-shrink: 0;
+  }
+
+  .logo-brand {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--t-primary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .proto-tag {
+    background: var(--green-10);
+    color: var(--green);
+    border: 1px solid rgba(55,255,125,0.3);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .header-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--t-primary);
+    letter-spacing: -0.5px;
+    margin-top: 24px;
+  }
+
+  .header-sub {
+    font-size: 14px;
+    color: var(--t-secondary);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .progress-row {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--t-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-elevated);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--green);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(55,255,125,0.35);
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 32px 64px 64px;
+  }
+
+  /* ── SECTION ── */
+  .screen-section {
+    margin-bottom: 44px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--t-primary);
+    letter-spacing: 0.3px;
+  }
+
+  .section-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--t-muted);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* ── CARD ── */
+  .screen-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    color: var(--t-primary);
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(ellipse at top left, rgba(55,255,125,0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .screen-card:hover {
+    border-color: var(--green);
+    box-shadow: 0 4px 20px rgba(55,255,125,0.08);
+    transform: translateY(-2px);
+  }
+
+  .screen-card:hover::before {
+    opacity: 1;
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .screen-number-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--t-muted);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .device-tag {
+    font-size: 10px;
+    color: var(--t-muted);
+    font-weight: 500;
+  }
+
+  .card-icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--t-primary);
+    margin-top: 12px;
+    line-height: 1.2;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--t-secondary);
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+
+  .card-open-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+    margin-top: 16px;
+    transition: gap 0.15s;
+  }
+
+  .screen-card:hover .card-open-link {
+    gap: 7px;
+  }
+
+  .card-open-link .arrow {
+    font-size: 14px;
+    line-height: 1;
+    transition: transform 0.15s;
+  }
+
+  .screen-card:hover .card-open-link .arrow {
+    transform: translateX(2px);
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 44px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 24px 64px 40px;
+    font-size: 12px;
+    color: var(--t-muted);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-mark-lg">P</div>
+      <span class="logo-brand">Predicta Tournament</span>
+      <span class="proto-tag">UI Prototype</span>
+    </div>
+    <div class="header-title">Prototype Screen Index</div>
+    <div class="header-sub">All 14 screens of the Tournament Management System. Click any screen to preview.</div>
+    <div class="progress-row">
+      <span class="progress-label">14 of 14 screens complete</span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- SECTION 1: Admin Screens -->
+    <div class="screen-section">
+      <div class="section-header">
+        <span class="section-title">Admin Screens</span>
+        <span class="section-badge">Desktop · 1440px</span>
+      </div>
+      <div class="card-grid">
+
+        <a class="screen-card" target="_blank" href="01_Admin_Dashboard.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 01</span>
+            <span class="device-tag">Desktop 1440px</span>
+          </div>
+          <div class="card-icon-circle">⊞</div>
+          <div class="card-title">Admin Command Center</div>
+          <div class="card-desc">Super-Admin dashboard with live stats, tournaments, and activity feed</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="02_Tournament_Creation_Wizard.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 02</span>
+            <span class="device-tag">Desktop 1440px</span>
+          </div>
+          <div class="card-icon-circle">✦</div>
+          <div class="card-title">Tournament Creation Wizard</div>
+          <div class="card-desc">3-step wizard to create tournaments with game variant and schedule selection</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="03_Tournament_Detail.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 03</span>
+            <span class="device-tag">Desktop 1440px</span>
+          </div>
+          <div class="card-icon-circle">⬡</div>
+          <div class="card-title">Tournament Detail</div>
+          <div class="card-desc">Manage attached tables, view mini-leaderboard, attach/detach tables</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="04_Player_Management.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 04</span>
+            <span class="device-tag">Desktop 1440px</span>
+          </div>
+          <div class="card-icon-circle">👤</div>
+          <div class="card-title">Player Management</div>
+          <div class="card-desc">Full player directory with wallet status, search, filter, and registration modal</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="05_Leaderboard_Analytics.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 05</span>
+            <span class="device-tag">Desktop 1440px</span>
+          </div>
+          <div class="card-icon-circle">📊</div>
+          <div class="card-title">Leaderboard Analytics</div>
+          <div class="card-desc">Full leaderboard with podium, points bars, rank changes, and export</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="14_System_Settings.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 14</span>
+            <span class="device-tag">Desktop 1440px</span>
+          </div>
+          <div class="card-icon-circle">⚙</div>
+          <div class="card-title">System Settings</div>
+          <div class="card-desc">Server config, table management, display preferences, and logs</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- SECTION 2: Dealer Screens -->
+    <div class="screen-section">
+      <div class="section-header">
+        <span class="section-title">Dealer Screens</span>
+        <span class="section-badge">Tablet Portrait · 1200×1920</span>
+      </div>
+      <div class="card-grid">
+
+        <a class="screen-card" target="_blank" href="06_Dealer_Dashboard.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 06</span>
+            <span class="device-tag">Tablet Portrait</span>
+          </div>
+          <div class="card-icon-circle">🃏</div>
+          <div class="card-title">Dealer Dashboard</div>
+          <div class="card-desc">Primary dealer interface for managing hands, pots, and session flow</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="07_Table_Seating_View.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 07</span>
+            <span class="device-tag">Tablet Portrait</span>
+          </div>
+          <div class="card-icon-circle">⭕</div>
+          <div class="card-title">Table Seating View</div>
+          <div class="card-desc">Visual oval table layout with per-seat player details and status indicators</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="08_Player_Onboarding.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 08</span>
+            <span class="device-tag">Tablet Portrait</span>
+          </div>
+          <div class="card-icon-circle">➕</div>
+          <div class="card-title">Player Onboarding</div>
+          <div class="card-desc">Dealer-side flow for seating a player, verifying identity, and assigning chips</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="09_Buyin_Rebuy.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 09</span>
+            <span class="device-tag">Tablet Portrait</span>
+          </div>
+          <div class="card-icon-circle">💰</div>
+          <div class="card-title">Buy-in & Rebuy Panel</div>
+          <div class="card-desc">Manage player buy-ins, rebuys, and chip adjustments at the table</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- SECTION 3: Player Screens -->
+    <div class="screen-section">
+      <div class="section-header">
+        <span class="section-title">Player Screens</span>
+        <span class="section-badge">Kiosk / Tablet · 1200×1920</span>
+      </div>
+      <div class="card-grid">
+
+        <a class="screen-card" target="_blank" href="10_Player_Registration_Kiosk.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 10</span>
+            <span class="device-tag">Kiosk / Tablet</span>
+          </div>
+          <div class="card-icon-circle">📋</div>
+          <div class="card-title">Registration Kiosk</div>
+          <div class="card-desc">Self-service player registration with ID entry and tournament enrollment</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="11_Player_Landing.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 11</span>
+            <span class="device-tag">Kiosk / Tablet</span>
+          </div>
+          <div class="card-icon-circle">🪑</div>
+          <div class="card-title">Player Landing Screen</div>
+          <div class="card-desc">Welcome screen with table assignment prompt and quick take-a-seat flow</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- SECTION 4: Display Screens -->
+    <div class="screen-section">
+      <div class="section-header">
+        <span class="section-title">Display Screens</span>
+        <span class="section-badge">Large Screens</span>
+      </div>
+      <div class="card-grid">
+
+        <a class="screen-card" target="_blank" href="02_TV_Leaderboard.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 12</span>
+            <span class="device-tag">1920×1080</span>
+          </div>
+          <div class="card-icon-circle">📺</div>
+          <div class="card-title">TV / Projector Leaderboard</div>
+          <div class="card-desc">1920×1080 · Live display for spectators showing top players and standings</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+        <a class="screen-card" target="_blank" href="13_Table_Topper.html">
+          <div class="card-header-row">
+            <span class="screen-number-badge">Screen 13</span>
+            <span class="device-tag">1280×800</span>
+          </div>
+          <div class="card-icon-circle">🖥</div>
+          <div class="card-title">Table Topper Display</div>
+          <div class="card-desc">1280×800 · Per-table LCD display showing standings, hand count, and seat status</div>
+          <div class="card-open-link">Open Screen <span class="arrow">→</span></div>
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Predicta Tournament Management System · UI Prototype v1.0
+  </div>
+
+</body>
+</html>
